@@ -29,7 +29,7 @@ void BezierCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 			Vec4f mbx = mb * px;
 			Vec4f mby = mb * py;
 			for (float t = 0.01; t < 1; t += 0.01) {
-				Vec4f v(t * t, t * t, t, 1);
+				Vec4f v(t * t * t, t * t, t, 1);
 				float x = v * mbx;
 				float y = v * mby;
 				if (x <= CtrlPts[i * 3 + 3].x && x >= CtrlPts[i * 3].x) { // restrict the curve inside the interval
