@@ -1,27 +1,29 @@
-#include "bsplinecurveevaluator.h"
+#include "catmullromcurveevaluator.h"
+
+#include "beziercurveevaluator.h"
 #include "mat.h"
 #include "vec.h"
 #include <iostream>
 using namespace std;
-
-void BSplineCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
+void CatmullRomCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 	std::vector<Point>& ptvEvaluatedCurvePts,
 	const float& fAniLength,
 	const bool& bWrap) const
 {
+	ptvEvaluatedCurvePts.clear();
 
 	Mat4f m(-1, 3, -3, 1,
-			 3, -6, 3, 0,
-			 -3, 0, 3, 0,
-			 1, 4, 1, 0);
-	m /= 6.0;
+			2, -5, 4, -1,
+			-1, 0, 1, 0,
+			0, 2, 0, 0);
+	m *= 0.5;
 
 	ptvEvaluatedCurvePts.clear();
 
 	std::vector<Point> ctrlPts;
 	ctrlPts.assign(ptvCtrlPts.begin(), ptvCtrlPts.end());
 
-	if (bWrap) { 
+	if (bWrap) {
 		ctrlPts.push_back(Point(ptvCtrlPts[0].x + fAniLength, ptvCtrlPts[0].y));
 		ctrlPts.push_back(Point(ptvCtrlPts[1].x + fAniLength, ptvCtrlPts[1].y));
 		if (ptvCtrlPts.size() >= 3) // if there are 3 or more points, add the first 3 points to the back so that the wrapped curve is natural
@@ -38,6 +40,7 @@ void BSplineCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 
 	int numPt = ctrlPts.size();
 	if (numPt > 3) {
+		float prev_x = -fAniLength;
 		for (int i = 0; i < numPt - 3; i++) {
 			Vec4f px(ctrlPts[i].x, ctrlPts[i + 1].x, ctrlPts[i + 2].x, ctrlPts[i + 3].x);
 			Vec4f py(ctrlPts[i].y, ctrlPts[i + 1].y, ctrlPts[i + 2].y, ctrlPts[i + 3].y);
@@ -47,10 +50,11 @@ void BSplineCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 				Vec4f v(t * t * t, t * t, t, 1);
 				float x = v * mx;
 				float y = v * my;
-				if (x <= ctrlPts[i + 3].x && x >= ctrlPts[i].x) {
+				if (x <= ctrlPts[i + 3].x && x >= ctrlPts[i].x && x > prev_x) {
 					if (bWrap && x > fAniLength) x -= fAniLength; // wrapped!
 					ptvEvaluatedCurvePts.push_back(Point(x, y));
 				}
+				prev_x = x;
 			}
 		}
 	}
