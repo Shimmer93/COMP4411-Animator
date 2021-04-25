@@ -8,9 +8,13 @@
 #include <FL/gl.h>
 #include <cmath>
 #include <functional>
+#include <vector>
 
 #include "modelerglobals.h"
 #include "metaball.h"
+#include "particleSystem.h"
+#include "mat.h"
+#include "force.h"
 
 const GLuint TID = 1;
 int FRAME = 0;
@@ -46,6 +50,32 @@ ModelerView* createMyModel(int x, int y, int w, int h, char* label)
 
 // We are going to override (is that the right word?) the draw()
 // method of ModelerView to draw out SampleModel
+
+Mat4f getModelViewMatrix()
+{
+	/**************************
+	**
+	**	GET THE OPENGL MODELVIEW MATRIX
+	**
+	**	Since OpenGL stores it's matricies in
+	**	column major order and our library
+	**	use row major order, we will need to
+	**	transpose what OpenGL gives us before returning.
+	**
+	**	Hint:  Use look up glGetFloatv or glGetDoublev
+	**	for how to get these values from OpenGL.
+	**
+	*******************************/
+
+	GLfloat m[16];
+	glGetFloatv(GL_MODELVIEW_MATRIX, m);
+	Mat4f matMV(m[0], m[1], m[2], m[3],
+				m[4], m[5], m[6], m[7],
+				m[8], m[9], m[10], m[11],
+				m[12], m[13], m[14], m[15]);
+
+	return matMV.transpose(); // convert to row major
+}
 
 // Util function for animation
 float getCurrentFrameArmAngle() {
@@ -351,6 +381,9 @@ void MyModel::draw()
 	// projection matrix, don't bother with this ...
 	ModelerView::draw();
 
+	Mat4f cameraMatrix = getModelViewMatrix();
+	ParticleSystem* ps = ModelerApplication::Instance()->GetParticleSystem();
+
 	// Initialization
 	if (!initialized)
 		init();
@@ -414,6 +447,9 @@ void MyModel::draw()
 				drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 5.0 / 9.0, 1.8, 1.2);
 				glPopMatrix();
 
+				Mat4f modelViewMatrix = getModelViewMatrix();
+				ps->spawnParticles(cameraMatrix, modelViewMatrix, 20);
+
 				// layer 4: lower cylinder
 				glPushMatrix();
 				glTranslated(0.0, 1.0, (VAL(BODY_HEIGHT) - 0.5) * (-4.0) / 9.0);
@@ -455,6 +491,9 @@ void MyModel::draw()
 
 	glPopMatrix();
 
+	//ps->drawParticles(ModelerApplication::Instance()->GetTime());
+	if (ModelerApplication::Instance()->GetTime() == 0)
+		ps->clearParticles();
 
 	if (isAnimated) {
 		FRAME++;
@@ -529,5 +568,11 @@ int main()
 	controls[MOOD_CYCLING] = ModelerControl("Enable Mood Cycling?", 0, 1, 1, 0);
 
 	ModelerApplication::Instance()->Init(&createMyModel, controls, NUMCONTROLS);
+
+	vector<Force*> forces;
+	forces.push_back(new Gravity(5.0));
+	ParticleSystem* ps = new ParticleSystem(forces, ModelerApplication::Instance()->GetFps());
+
+	ModelerApplication::Instance()->SetParticleSystem(ps);
 	return ModelerApplication::Instance()->Run();
 }

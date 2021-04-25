@@ -99,15 +99,6 @@
     <ClCompile Include="rulerwindow.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="mymodel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="metaball.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="marchingcube.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="bsplinecurveevaluator.cpp">
       <Filter>Source Files\Curves</Filter>
     </ClCompile>
@@ -116,6 +107,18 @@
     </ClCompile>
     <ClCompile Include="catmullromcurveevaluator.cpp">
       <Filter>Source Files\Curves</Filter>
+    </ClCompile>
+    <ClCompile Include="force.cpp">
+      <Filter>Source Files\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="metaball.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="marchingcube.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="mymodel.cpp">
+      <Filter>Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -179,15 +182,6 @@
     <ClInclude Include="vec.h">
       <Filter>Header Files\Math.</Filter>
     </ClInclude>
-    <ClInclude Include="metaball.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="marchingcube.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="modelerglobals.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="bsplinecurveevaluator.h">
       <Filter>Header Files\Curves.</Filter>
     </ClInclude>
@@ -196,6 +190,18 @@
     </ClInclude>
     <ClInclude Include="catmullromcurveevaluator.h">
       <Filter>Header Files\Curves.</Filter>
+    </ClInclude>
+    <ClInclude Include="force.h">
+      <Filter>Header Files\Particles.</Filter>
+    </ClInclude>
+    <ClInclude Include="marchingcube.h">
+      <Filter>Header Files\Model.</Filter>
+    </ClInclude>
+    <ClInclude Include="metaball.h">
+      <Filter>Header Files\Model.</Filter>
+    </ClInclude>
+    <ClInclude Include="modelerglobals.h">
+      <Filter>Header Files\Model.</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

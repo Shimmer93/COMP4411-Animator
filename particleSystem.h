@@ -17,8 +17,15 @@
 #define __PARTICLE_SYSTEM_H__
 
 #include "vec.h"
+#include "mat.h"
+#include "particle.h"
+#include "force.h"
+#include <functional>
+#include <vector>
+#include <map>
+#include <iostream>
 
-
+using namespace std;
 
 class ParticleSystem {
 
@@ -27,8 +34,7 @@ public:
 
 
 	/** Constructor **/
-	ParticleSystem();
-
+	ParticleSystem(vector<Force*> forces, float fps);
 
 	/** Destructor **/
 	virtual ~ParticleSystem();
@@ -62,7 +68,11 @@ public:
 	// of baked particles (without leaking memory).
 	virtual void clearBaked();	
 
+	virtual void spawnParticles(Mat4f cameraMatrix, Mat4f modelViewMatrix, int numParticles);
 
+	virtual void clearParticles();
+
+	virtual Vec3f applyForces(const Particle* par, float t);
 
 	// These accessor fxns are implemented for you
 	float getBakeStartTime() { return bake_start_time; }
@@ -71,12 +81,15 @@ public:
 	bool isSimulate() { return simulate; }
 	bool isDirty() { return dirty; }
 	void setDirty(bool d) { dirty = d; }
-
+	bool isBaked() { return !baked_data.empty(); }
 
 
 protected:
 	
+	vector<Particle*> particles;
+	map<float, vector<Particle*>> baked_data;
 
+	vector<Force*> forces;
 
 	/** Some baking-related state **/
 	float bake_fps;						// frame rate at which simulation was baked
