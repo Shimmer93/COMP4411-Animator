@@ -120,6 +120,9 @@
     <ClCompile Include="mymodel.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
+    <ClCompile Include="c2splinecurveevaluator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="curve.h">
@@ -202,6 +205,9 @@
     </ClInclude>
     <ClInclude Include="modelerglobals.h">
       <Filter>Header Files\Model.</Filter>
+    </ClInclude>
+    <ClInclude Include="c2splinecurveevaluator.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

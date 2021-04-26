@@ -8,7 +8,7 @@
   - [x] Bezier Curve
   - [x] B-Spline Curve
   - [x] Catmull-Rom Curve
-- [ ] Particle system
+- [x] Particle system
 
 
 
@@ -37,7 +37,7 @@
 - [ ] (1B1W) Lens flare
 - [ ] (1B1W, vary) New interface
 - [ ] (2B) Flocking behaviors of particles
-- [ ] (2B) C2-Interpolating curve
+- [x] (2B) C2-Interpolating curve
 - [ ] (2B) Edit Catmull-Rom curves using inner Bezier control points
 - [ ] (2B) Picking a part in the model hierarchy
 - [ ] (2B) Avoid gimbal lock
