@@ -14,7 +14,7 @@
 
 ## Bells & Whistles
 
-- [ ] (1W) Enhance the spline options
+- [x] (1W) Enhance the spline options (tension adjustion)
 - [ ] (1W) Support of TGA file format
 - [ ] (1W) Render a mirror
 - [ ] (1W) Billboarding

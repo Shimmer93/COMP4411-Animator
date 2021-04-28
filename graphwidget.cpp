@@ -30,6 +30,8 @@
 #include "catmullromcurveevaluator.h"
 #include "c2splinecurveevaluator.h"
  
+#include <iostream>
+using namespace std;
 
 #define LEFT		1
 #define MIDDLE		2
@@ -65,6 +67,9 @@
 #define ALT_LEFT_DOWN		28
 #define ALT_LEFT_DRAG		29
 #define ALT_LEFT_UP			30
+#define ALT_RIGHT_DOWN		31
+#define ALT_RIGHT_DRAG		32
+#define ALT_RIGHT_UP		33
 
 #define GRID_BACKGROUND_INTENSITY 0.65f
 #define CURR_CURVE_INTENSITY 1.0f
@@ -326,6 +331,16 @@ void GraphWidget::draw()
 				endZoomSelection(m_iMouseX, m_iMouseY);
 				break;
 
+			case ALT_RIGHT_DOWN:
+				startTensionAdjustion(m_iMouseDY);
+				break;
+			case ALT_RIGHT_DRAG:
+				doTensionAdjustion(m_iMouseDY);
+				break;
+			case ALT_RIGHT_UP:
+				endTensionAdjustion(m_iMouseDY);
+				break;
+
 			default:
 				break;
 		}
@@ -365,6 +380,8 @@ int GraphWidget::handle(int event)
 					m_iEventToDo = SHIFT_RIGHT_DOWN;
 				else if (Fl::event_state(FL_CTRL))
 					m_iEventToDo = CTRL_RIGHT_DOWN;
+				else if (Fl::event_state(FL_ALT))
+					m_iEventToDo = ALT_RIGHT_DOWN;
 				else
 					m_iEventToDo = RIGHT_MOUSE_DOWN;
 				m_bRButtonDown = true;
@@ -399,6 +416,8 @@ int GraphWidget::handle(int event)
 				m_iEventToDo = SHIFT_RIGHT_DRAG;
 			else if (Fl::event_state(FL_CTRL))
 				m_iEventToDo = CTRL_RIGHT_DRAG;
+			else if (Fl::event_state(FL_ALT))
+				m_iEventToDo = ALT_RIGHT_DRAG;
 			else 
 				m_iEventToDo = RIGHT_MOUSE_DRAG;
 			m_bHasEvent = true;
@@ -433,6 +452,8 @@ int GraphWidget::handle(int event)
 					m_iEventToDo = SHIFT_RIGHT_UP;
 				else if (Fl::event_state(FL_CTRL))
 					m_iEventToDo = CTRL_RIGHT_UP;
+				else if (Fl::event_state(FL_ALT))
+					m_iEventToDo = ALT_RIGHT_UP;
 				else
 					m_iEventToDo = RIGHT_MOUSE_UP;
 				m_bRButtonDown = false;
@@ -794,6 +815,18 @@ void GraphWidget::doPan(const int iMouseDX, const int iMouseDY)
 	m_rectCurrViewport.bottom(m_rectCurrViewport.bottom() + fdy);
 	m_rectCurrViewport.top(m_rectCurrViewport.top() + fdy);
 }
+
+void GraphWidget::startTensionAdjustion(const int iMouseDY)
+{}
+
+void GraphWidget::doTensionAdjustion(const int iMouseDY)
+{
+	((CatmullRomCurveEvaluator*)m_ppceCurveEvaluators[CURVE_TYPE_CATMULLROM])->adjustTension((float)iMouseDY / 100.0);
+	m_pcrvvCurves[m_iCurrCurve]->onValueChanged();
+}
+
+void GraphWidget::endTensionAdjustion(const int iMouseDY)
+{}
 
 void GraphWidget::zoomAll()
 {
