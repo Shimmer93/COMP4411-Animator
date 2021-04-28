@@ -1,6 +1,7 @@
 // The sample model.  You should build a file
 // very similar to this for when you make your model.
 #include "bitmap.h"
+#include "tga.h"
 #include "modelerview.h"
 #include "modelerapp.h"
 #include "modelerdraw.h"
@@ -101,15 +102,15 @@ float getCurrentFrameBodyHeight() {
 // Initialize the texture
 void initTexture() {
 	// Read the bitmap
-	char* imgName = "texture.bmp";
+	char* imgName = "LightFlare.tga";
 	int width, height;
 
-	unsigned char* data = readBMP(imgName, width, height);
+	unsigned char* data = readTGA(imgName, width, height);
 	// Load the bitmap into the texture
 	GLuint textureID;
 	glGenTextures(TID, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	// Set parameters for the texture
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -398,6 +399,8 @@ void MyModel::draw()
 
 	// Texture
 	if (VAL(USE_TEXTURE) == 1) {
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0.5);
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, TID);
 	}
@@ -512,6 +515,7 @@ void MyModel::draw()
 	}
 
 	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_ALPHA_TEST);
 }
 
 int main()
