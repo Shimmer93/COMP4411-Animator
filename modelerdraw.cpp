@@ -99,7 +99,7 @@ void setDiffuseColor(float r, float g, float b)
     if (mds->m_drawMode == NORMAL)
         glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE, mds->m_diffuseColor);
     else
-        glColor3f(r,g,b);
+        glColor4f(r,g,b, 1.0);
 }
 
 void setSpecularColor(float r, float g, float b)

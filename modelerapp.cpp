@@ -137,6 +137,11 @@ ParticleSystem *ModelerApplication::GetParticleSystem()
 	return ps;
 }
 
+ModelerUI* ModelerApplication::GetUI()
+{
+	return m_ui;
+}
+
 void ModelerApplication::SetParticleSystem(ParticleSystem *s)
 {
 	ps = s;

@@ -20,6 +20,7 @@
 #include "mat.h"
 #include "particle.h"
 #include "force.h"
+#include "camera.h"
 #include <functional>
 #include <vector>
 #include <map>
@@ -74,6 +75,8 @@ public:
 
 	virtual Vec3f applyForces(const Particle* par, float t);
 
+	virtual void sortParticles();
+
 	// These accessor fxns are implemented for you
 	float getBakeStartTime() { return bake_start_time; }
 	float getBakeEndTime() { return bake_end_time; }
@@ -85,7 +88,8 @@ public:
 
 
 protected:
-	
+	Camera* camera;
+
 	vector<Particle*> particles;
 	map<float, vector<Particle*>> baked_data;
 
@@ -102,6 +106,7 @@ protected:
 	bool simulate;						// flag for simulation mode
 	bool dirty;							// flag for updating ui (don't worry about this)
 
+	bool compareParticles(const Particle* par1, const Particle* par2);
 };
 
 

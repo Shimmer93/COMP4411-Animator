@@ -10,7 +10,7 @@ public:
 	Particle(float mass, Vec3f position, Vec3f velocity)
 		: m(mass), p(position), v(velocity) {}
 
-	void draw();
+	void draw(const Vec3f& camPos);
 
 	float m;
 	Vec3f p;

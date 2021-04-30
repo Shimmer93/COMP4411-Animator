@@ -101,6 +101,8 @@ void ModelerView::draw()
 		glEnable( GL_LIGHT0 );
         glEnable( GL_LIGHT1 );
 		glEnable( GL_NORMALIZE );
+		glEnable(GL_BLEND); // For transparency
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
   	glViewport( 0, 0, w(), h() );
@@ -118,12 +120,13 @@ void ModelerView::draw()
     glLightfv( GL_LIGHT1, GL_POSITION, lightPosition1 );
     glLightfv( GL_LIGHT1, GL_DIFFUSE, lightDiffuse1 );
 
+	// If call drawParticles() here by default, there will be problems on transparency. Thus move to mymodel.cpp
 	// If particle system exists, draw it
-	ParticleSystem *ps = ModelerApplication::Instance()->GetParticleSystem();
+	/*ParticleSystem *ps = ModelerApplication::Instance()->GetParticleSystem();
 	if (ps != NULL) {
 		ps->computeForcesAndUpdateParticles(t);
 		ps->drawParticles(t);
-	}
+	}*/
 }
 
 

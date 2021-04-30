@@ -17,7 +17,6 @@
 #include "mat.h"
 #include "force.h"
 
-const GLuint TID = 1;
 int FRAME = 0;
 int MOOD_COUNT = 0;
 const int MAX_FRAME = 60;
@@ -102,22 +101,23 @@ float getCurrentFrameBodyHeight() {
 // Initialize the texture
 void initTexture() {
 	// Read the bitmap
-	char* imgName = "LightFlare.tga";
+	char* imgName = "textures/Bubble.tga";
 	int width, height;
 
 	unsigned char* data = readTGA(imgName, width, height);
+
 	// Load the bitmap into the texture
 	GLuint textureID;
-	glGenTextures(TID, &textureID);
+	glGenTextures(TEXTURE_ID, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	// Set parameters for the texture
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -399,10 +399,11 @@ void MyModel::draw()
 
 	// Texture
 	if (VAL(USE_TEXTURE) == 1) {
-		glEnable(GL_ALPHA_TEST);
-		glAlphaFunc(GL_GREATER, 0.5);
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, TID);
+		glBindTexture(GL_TEXTURE_2D, TEXTURE_ID);
+	}
+	else {
+		glDisable(GL_TEXTURE_2D);
 	}
 
 	// layer 1: whole model
@@ -451,7 +452,7 @@ void MyModel::draw()
 				glPopMatrix();
 
 				Mat4f modelViewMatrix = getModelViewMatrix();
-				ps->spawnParticles(cameraMatrix, modelViewMatrix, 20);
+				ps->spawnParticles(cameraMatrix, modelViewMatrix, 10);
 
 				// layer 4: lower cylinder
 				glPushMatrix();
@@ -494,7 +495,9 @@ void MyModel::draw()
 
 	glPopMatrix();
 
-	//ps->drawParticles(ModelerApplication::Instance()->GetTime());
+	ps->sortParticles();
+	ps->drawParticles(ModelerApplication::Instance()->GetTime());
+
 	if (ModelerApplication::Instance()->GetTime() == 0)
 		ps->clearParticles();
 
@@ -513,9 +516,6 @@ void MyModel::draw()
 			MOOD_COUNT = 0;
 		}
 	}
-
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_ALPHA_TEST);
 }
 
 int main()
