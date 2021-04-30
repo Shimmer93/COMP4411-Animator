@@ -15,9 +15,9 @@
 ## Bells & Whistles
 
 - [x] (1W) Enhance the spline options (tension adjustion)
-- [ ] (1W) Support of TGA file format
+- [x] (1W) Support of TGA file format
 - [ ] (1W) Render a mirror
-- [ ] (1W) Billboarding
+- [x] (1W) Billboarding
 - [ ] (1W each) Use billboarding to render the following:
   - [ ] Fire
   - [ ] Snow
