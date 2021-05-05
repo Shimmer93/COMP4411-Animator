@@ -16,6 +16,7 @@
 #include "particleSystem.h"
 #include "mat.h"
 #include "force.h"
+#include "ClothSystem.h"
 
 int FRAME = 0;
 int MOOD_COUNT = 0;
@@ -427,79 +428,79 @@ void MyModel::draw()
 	}
 
 	glPushMatrix();
-	glTranslated(VAL(XPOS), VAL(YPOS), VAL(ZPOS));
-	glScaled(VAL(XSCALE), VAL(YSCALE), VAL(ZSCALE));
-		
-		// layer 2: main body with cross
-		glPushMatrix();
-		glRotated(VAL(BODY_ROTATE_X), 1.0, 0.0, 0.0);
-		glRotated(VAL(BODY_ROTATE_Y), 0.0, 1.0, 0.0);
-		glRotated(VAL(BODY_ROTATE_Z), 0.0, 0.0, 1.0);
-		glTranslated(0.0, getCurrentFrameBodyHeight(), 0.0);
-		glTranslated(0.0, 0.0, 1.0);
-			glPushMatrix();
-			glRotated(270, 1.0, 0.0, 0.0);
-				// layer 4: middle cylinder
-				glPushMatrix();
-				glTranslated(0.0, 1.0, 0.0);
-				drawCylinder(0.5, 2.0, 2.0);
-				glPopMatrix();
+	//glTranslated(VAL(XPOS), VAL(YPOS), VAL(ZPOS));
+	//glScaled(VAL(XSCALE), VAL(YSCALE), VAL(ZSCALE));
+	//	
+	//	// layer 2: main body with cross
+	//	glPushMatrix();
+	//	glRotated(VAL(BODY_ROTATE_X), 1.0, 0.0, 0.0);
+	//	glRotated(VAL(BODY_ROTATE_Y), 0.0, 1.0, 0.0);
+	//	glRotated(VAL(BODY_ROTATE_Z), 0.0, 0.0, 1.0);
+	//	glTranslated(0.0, getCurrentFrameBodyHeight(), 0.0);
+	//	glTranslated(0.0, 0.0, 1.0);
+	//		glPushMatrix();
+	//		glRotated(270, 1.0, 0.0, 0.0);
+	//			// layer 4: middle cylinder
+	//			glPushMatrix();
+	//			glTranslated(0.0, 1.0, 0.0);
+	//			drawCylinder(0.5, 2.0, 2.0);
+	//			glPopMatrix();
 
-				// layer 4: upper cylinder
-				glPushMatrix();
-				glTranslated(0.0, 1.0, 0.5);
-				drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 5.0 / 9.0, 1.8, 1.2);
-				glPopMatrix();
+	//			// layer 4: upper cylinder
+	//			glPushMatrix();
+	//			glTranslated(0.0, 1.0, 0.5);
+	//			drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 5.0 / 9.0, 1.8, 1.2);
+	//			glPopMatrix();
 
-				Mat4f modelViewMatrix = getModelViewMatrix();
-				ps->spawnParticles(cameraMatrix, modelViewMatrix, 10);
+	//			Mat4f modelViewMatrix = getModelViewMatrix();
+	//			//ps->spawnParticles(cameraMatrix, modelViewMatrix, 10);
 
-				// layer 4: lower cylinder
-				glPushMatrix();
-				glTranslated(0.0, 1.0, (VAL(BODY_HEIGHT) - 0.5) * (-4.0) / 9.0);
-				drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 4.0 / 9.0, 1.2, 1.8);
-				glPopMatrix();
-			glPopMatrix();
+	//			// layer 4: lower cylinder
+	//			glPushMatrix();
+	//			glTranslated(0.0, 1.0, (VAL(BODY_HEIGHT) - 0.5) * (-4.0) / 9.0);
+	//			drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 4.0 / 9.0, 1.2, 1.8);
+	//			glPopMatrix();
+	//		glPopMatrix();
 
-			// layer 3: cross
-			glPushMatrix();
-			setDiffuseColor(0.8, 0.8, 0.8);
-				
-				// layer 4: one stroke of cross
-				glPushMatrix();
-				glTranslated(-1.2, -0.4, 1.0);
-				glRotated(30, 0.0, 0.0, 1.0);
-				drawBox(2.4, 0.4, 0.2);
-				glPopMatrix();
+	//		// layer 3: cross
+	//		glPushMatrix();
+	//		setDiffuseColor(0.8, 0.8, 0.8);
+	//			
+	//			// layer 4: one stroke of cross
+	//			glPushMatrix();
+	//			glTranslated(-1.2, -0.4, 1.0);
+	//			glRotated(30, 0.0, 0.0, 1.0);
+	//			drawBox(2.4, 0.4, 0.2);
+	//			glPopMatrix();
 
-				// layer 4: another stroke of cross
-				glPushMatrix();
-				glTranslated(-1.2, 0.8, 1.0);
-				glRotated(-30, 0.0, 0.0, 1.0);
-				drawBox(2.4, 0.4, 0.2);
-				glPopMatrix();
-			glPopMatrix();
-		glPopMatrix();
+	//			// layer 4: another stroke of cross
+	//			glPushMatrix();
+	//			glTranslated(-1.2, 0.8, 1.0);
+	//			glRotated(-30, 0.0, 0.0, 1.0);
+	//			drawBox(2.4, 0.4, 0.2);
+	//			glPopMatrix();
+	//		glPopMatrix();
+	//	glPopMatrix();
 
-		//layer 2: arms with shoulders
-		drawArmWithShoulder(45, 1.5, 1.2, 1.0);
-		drawArmWithShoulder(135, 1.5, 1.2, -1.0);
-		drawArmWithShoulder(225, -1.5, 1.2, -1.0);
-		drawArmWithShoulder(315, -1.5, 1.2, 1.0);
-		if (VAL(ARM_NUMBER) == 5)
-			drawArmWithShoulder(90, 1.5, 1.2, 0);
-		if (VAL(ARM_NUMBER) == 6) {
-			drawArmWithShoulder(90, 1.5, 1.2, 0);
-			drawArmWithShoulder(270, -1.5, 1.2, 0);
-		}
+	//	//layer 2: arms with shoulders
+	//	drawArmWithShoulder(45, 1.5, 1.2, 1.0);
+	//	drawArmWithShoulder(135, 1.5, 1.2, -1.0);
+	//	drawArmWithShoulder(225, -1.5, 1.2, -1.0);
+	//	drawArmWithShoulder(315, -1.5, 1.2, 1.0);
+	//	if (VAL(ARM_NUMBER) == 5)
+	//		drawArmWithShoulder(90, 1.5, 1.2, 0);
+	//	if (VAL(ARM_NUMBER) == 6) {
+	//		drawArmWithShoulder(90, 1.5, 1.2, 0);
+	//		drawArmWithShoulder(270, -1.5, 1.2, 0);
+	//	}
 
+	ps->drawParticles(ModelerApplication::Instance()->GetTime());
 	glPopMatrix();
 
-	ps->sortParticles();
-	ps->drawParticles(ModelerApplication::Instance()->GetTime());
+	//ps->sortParticles();
 
-	if (ModelerApplication::Instance()->GetTime() == 0)
-		ps->clearParticles();
+	//if (ModelerApplication::Instance()->GetTime() == 0)
+	//	ps->clearParticles();
 
 	if (isAnimated) {
 		FRAME++;
@@ -574,9 +575,12 @@ int main()
 	ModelerApplication::Instance()->Init(&createMyModel, controls, NUMCONTROLS);
 
 	vector<Force*> forces;
-	forces.push_back(new Gravity(5.0));
-	ParticleSystem* ps = new ParticleSystem(forces, ModelerApplication::Instance()->GetFps());
-
+	//forces.push_back(new Gravity(5.0));
+	//forces.push_back(new Viscous(5.0));
+	//ParticleSystem* ps = new ParticleSystem(forces, ModelerApplication::Instance()->GetFps());
+	forces.push_back(new TestForce());
+	ClothSystem* ps = new ClothSystem(forces, ModelerApplication::Instance()->GetFps(),
+		0.1, 50, 50, Vec3f(-2.5, -2.5, 0), 2.0, 0.5);
 	ModelerApplication::Instance()->SetParticleSystem(ps);
 	return ModelerApplication::Instance()->Run();
 }

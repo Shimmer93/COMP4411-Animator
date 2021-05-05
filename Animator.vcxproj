@@ -150,6 +150,7 @@
     <ClCompile Include="bsplinecurveevaluator.cpp" />
     <ClCompile Include="c2splinecurveevaluator.cpp" />
     <ClCompile Include="catmullromcurveevaluator.cpp" />
+    <ClCompile Include="ClothSystem.cpp" />
     <ClCompile Include="curve.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -275,6 +276,7 @@
     <ClInclude Include="bsplinecurveevaluator.h" />
     <ClInclude Include="c2splinecurveevaluator.h" />
     <ClInclude Include="catmullromcurveevaluator.h" />
+    <ClInclude Include="ClothSystem.h" />
     <ClInclude Include="curve.h" />
     <ClInclude Include="curveevaluator.h" />
     <ClInclude Include="force.h" />

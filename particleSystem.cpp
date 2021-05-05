@@ -92,8 +92,9 @@ void ParticleSystem::computeForcesAndUpdateParticles(float t)
 
 	float prev_t = t - 1.0 / bake_fps;
 	for (auto par : particles) {
+		applyForces(par, prev_t);
 		par->p += (1.0 / bake_fps) * par->v;
-		par->v += (1.0 / bake_fps) * applyForces(par, prev_t) / par->m;
+		par->v += (1.0 / bake_fps) * par->f / par->m;
 	}
 
 	if (simulate) {
@@ -142,7 +143,7 @@ void ParticleSystem::spawnParticles(Mat4f cameraMatrix, Mat4f modelViewMatrix, i
 		float randVX = (frand() - 0.5) * 1;
 		float randVY = (frand() - 0.5) * 1;
 		float randVZ = (frand() - 0.5) * 1;
-		Particle* par = new Particle(0.1, Vec3f(worldPoint[0] + randX, worldPoint[1] + randY, worldPoint[2] + randZ + 1.8), Vec3f(randVX, randVY, 5+randVZ));
+		Particle* par = new Particle(0.1, Vec3f(worldPoint[0] + randX, worldPoint[1] + randY, worldPoint[2] + randZ + 1.8), Vec3f(randVX, randVY, 5+randVZ), Vec3f(0, 0, 0));
 		particles.push_back(par);
 	}
 }
@@ -152,12 +153,11 @@ void ParticleSystem::clearParticles()
 	particles.clear();
 }
 
-Vec3f ParticleSystem::applyForces(const Particle* par, float t)
+void ParticleSystem::applyForces(Particle* par, float t)
 {
-	Vec3f result(0.0, 0.0, 0.0);
-	for (auto f : forces)
-		result += f->apply(par, t);
-	return result;
+	par->f = Vec3f(0.0, 0.0, 0.0);
+	for (auto force : forces)
+		par->f += force->apply(par, t);
 }
 
 void ParticleSystem::sortParticles()

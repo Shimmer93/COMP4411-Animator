@@ -73,7 +73,7 @@ public:
 
 	virtual void clearParticles();
 
-	virtual Vec3f applyForces(const Particle* par, float t);
+	virtual void applyForces(Particle* par, float t);
 
 	virtual void sortParticles();
 
