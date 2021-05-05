@@ -17,5 +17,6 @@ private:
 
 	Vec3f computeFaceNormal(Vec3f p0, Vec3f p1, Vec3f p2);
 	void clearNormals();
+	void sortParticles();
 };
 

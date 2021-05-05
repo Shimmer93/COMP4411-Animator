@@ -22,6 +22,11 @@ Fl_Menu_Item ModelerUIWindows::menu_m_pmbMenuBar[] = {
  {"&Animation", 0,  0, 0, 64, 0, 0, 14, 0},
  {"&Set Animation Length", 0,  0, 0, 0, 0, 0, 14, 0},
  {0},
+ {"&Bonus", 0,  0, 0, 64, 0, 0, 14, 0},
+ {"&Show cloth", 0,  0, 0, 0, 0, 0, 14, 0},
+ {"S&how collision", 0,  0, 0, 0, 0, 0, 14, 0},
+ {"Sho&w metaball", 0,  0, 0, 0, 0, 0, 14, 0},
+ {0},
  {0}
 };
 Fl_Menu_Item* ModelerUIWindows::m_pmiOpenAniScript = ModelerUIWindows::menu_m_pmbMenuBar + 1;
@@ -37,6 +42,9 @@ Fl_Menu_Item* ModelerUIWindows::m_pmiMediumQuality = ModelerUIWindows::menu_m_pm
 Fl_Menu_Item* ModelerUIWindows::m_pmiLowQuality = ModelerUIWindows::menu_m_pmbMenuBar + 13;
 Fl_Menu_Item* ModelerUIWindows::m_pmiPoorQuality = ModelerUIWindows::menu_m_pmbMenuBar + 14;
 Fl_Menu_Item* ModelerUIWindows::m_pmiSetAniLen = ModelerUIWindows::menu_m_pmbMenuBar + 17;
+Fl_Menu_Item* ModelerUIWindows::m_pmiShowCloth = ModelerUIWindows::menu_m_pmbMenuBar + 20;
+Fl_Menu_Item* ModelerUIWindows::m_pmiShowCollision = ModelerUIWindows::menu_m_pmbMenuBar + 21;
+Fl_Menu_Item* ModelerUIWindows::m_pmiShowMetaball = ModelerUIWindows::menu_m_pmbMenuBar + 22;
 
 Fl_Menu_Item ModelerUIWindows::menu_m_pchoCurveType[] = {
  {"Linear", 0,  0, 0, 0, 0, 0, 12, 0},

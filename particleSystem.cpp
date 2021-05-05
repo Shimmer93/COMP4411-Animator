@@ -10,6 +10,8 @@
 #include <math.h>
 #include <limits.h>
 #include <algorithm>
+#include <iostream>
+using namespace std;
 
 float frand() {
 	return rand() / (float)RAND_MAX;
@@ -20,9 +22,9 @@ float frand() {
  * Constructors
  ***************/
 
-ParticleSystem::ParticleSystem(vector<Force*> forces, float fps)
-	: camera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera), particles(), baked_data(), forces(forces),
-	  bake_fps(fps), bake_start_time(0.0), bake_end_time(0.0), simulate(false), dirty(false)
+ParticleSystem::ParticleSystem(vector<Force*> forces, float fps, bool collide)
+	: camera(nullptr), particles(), baked_data(), forces(forces),
+	  bake_fps(fps), bake_start_time(0.0), bake_end_time(0.0), simulate(false), dirty(false), collide(collide)
 {}
 
 
@@ -91,21 +93,29 @@ void ParticleSystem::computeForcesAndUpdateParticles(float t)
 {
 
 	float prev_t = t - 1.0 / bake_fps;
+
+	if (collide)
+		detectCollision(0.2+1e-6);
+
 	for (auto par : particles) {
 		applyForces(par, prev_t);
 		par->p += (1.0 / bake_fps) * par->v;
 		par->v += (1.0 / bake_fps) * par->f / par->m;
+		//cout << par->p << '\t';
 	}
+	//cout << endl;
 
-	if (simulate) {
+	if (simulate)
 		bakeParticles(t);
-	}
 
 }
 
 /** Render particles */
 void ParticleSystem::drawParticles(float t)
 {
+	if (camera == nullptr)
+		return;
+
 	if (baked_data.count(t) > 0) {
 		for (auto par : baked_data.at(t))
 			par->draw(camera->getPosition());
@@ -172,4 +182,35 @@ bool ParticleSystem::compareParticles(const Particle* par1, const Particle* par2
 	float dis2 = (camera->getPosition() - par2->p).length2();
 
 	return dis1 > dis2;
+}
+
+void ParticleSystem::detectCollision(float thresh)
+{
+	int numPar = particles.size();
+	if (numPar < 2) return;
+
+	for (int i = 0; i < numPar - 1; i++) {
+		for (int j = i + 1; j < numPar; j++) {
+			Particle* par1 = particles[i];
+			Particle* par2 = particles[j];
+			Vec3f d = par1->p - par2->p;
+			if (d.length() < thresh && par1->v * d < 0 && par2->v * d > 0) {
+				float m1 = par1->m;
+				float m2 = par2->m;
+
+				Vec3f vd1 = par1->v * d / d.length2() * d;
+				Vec3f vd2 = par2->v * d / d.length2() * d;
+				Vec3f vdc1 = ((m1 - m2) * vd1 + 2 * m2 * vd2) / (m1 + m2);
+				Vec3f vdc2 = ((m2 - m1) * vd2 + 2 * m1 * vd1) / (m1 + m2);
+
+				par1->v += vdc1 - vd1;
+				par2->v += vdc2 - vd2;
+			}
+		}
+	}
+}
+
+void ParticleSystem::addParticle(Particle* par)
+{
+	particles.push_back(par);
 }

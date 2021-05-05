@@ -56,5 +56,11 @@ void Particle::draw(const Vec3f& camPos) {
 		glPopMatrix();
 
 		glDisable(GL_TEXTURE_2D);
+
+		/*glPushMatrix();
+		glTranslatef(p[0], p[1], p[2]);
+		drawSphere(0.1);
+		glPopMatrix();*/
+
 	}
 }

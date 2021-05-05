@@ -25,6 +25,7 @@
 
 #include "modelerui.h"
 #include "camera.h"
+#include "ClothSystem.h"
 
 using namespace std;
 
@@ -239,6 +240,36 @@ inline void ModelerUI::cb_aniLen_i(Fl_Menu_*, void*)
 void ModelerUI::cb_aniLen(Fl_Menu_* o, void* v) 
 {
 	((ModelerUI*)(o->parent()->user_data()))->cb_aniLen_i(o,v);
+}
+
+inline void ModelerUI::cb_cloth_i(Fl_Menu_*, void*)
+{
+	m_iDrawMode = CLOTH;
+}
+
+void ModelerUI::cb_cloth(Fl_Menu_* o, void* v)
+{
+	((ModelerUI*)(o->parent()->user_data()))->cb_cloth_i(o, v);
+}
+
+inline void ModelerUI::cb_collision_i(Fl_Menu_*, void*)
+{
+	m_iDrawMode = COLLISION;
+}
+
+void ModelerUI::cb_collision(Fl_Menu_* o, void* v)
+{
+	((ModelerUI*)(o->parent()->user_data()))->cb_collision_i(o, v);
+}
+
+inline void ModelerUI::cb_metaball_i(Fl_Menu_*, void*)
+{
+	m_iDrawMode = METABALL;
+}
+
+void ModelerUI::cb_metaball(Fl_Menu_* o, void* v)
+{
+	((ModelerUI*)(o->parent()->user_data()))->cb_metaball_i(o, v);
 }
 
 inline void ModelerUI::cb_fps_i(Fl_Slider*, void*) 
@@ -867,11 +898,17 @@ void ModelerUI::fps(const int iFps)
 	m_iFps = iFps;
 }
 
+int ModelerUI::getDrawMode()
+{
+	return m_iDrawMode;
+}
+
 ModelerUI::ModelerUI() : 
 m_iCurrControlCount(0), 
 m_pcbfValueChangedCallback(NULL),
 m_iFps(30),
 m_bAnimating(false),
+m_iDrawMode(ORIGINAL),
 m_bSaveMovie(false)
 {
 	// setup all the callback functions...
@@ -888,6 +925,9 @@ m_bSaveMovie(false)
 	m_pmiLowQuality->callback((Fl_Callback*)cb_low);
 	m_pmiPoorQuality->callback((Fl_Callback*)cb_poor);
 	m_pmiSetAniLen->callback((Fl_Callback*)cb_aniLen);
+	m_pmiShowCloth->callback((Fl_Callback*)cb_cloth);
+	m_pmiShowCollision->callback((Fl_Callback*)cb_collision);
+	m_pmiShowMetaball->callback((Fl_Callback*)cb_metaball);
 	m_pbrsBrowser->callback((Fl_Callback*)cb_browser);
 	m_ptabTab->callback((Fl_Callback*)cb_tab);
 	m_pwndGraphWidget->callback((Fl_Callback*)cb_graphWidget);

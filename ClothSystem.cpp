@@ -7,7 +7,7 @@ using namespace std;
 
 ClothSystem::ClothSystem(vector<Force*> forces, float fps, float gridSize, int height, int width, 
 	  Vec3f startPoint, float ks, float kd)
-	: ParticleSystem(forces, fps), gridSize(gridSize), height(height), width(width)
+	: ParticleSystem(forces, fps, false), gridSize(gridSize), height(height), width(width)
 {
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
@@ -79,6 +79,7 @@ void ClothSystem::drawParticles(float t)
 				Vec3f n023 = computeFaceNormal(p2, p3, p0);
 				Vec3f n013 = computeFaceNormal(p0, p1, p3);
 				Vec3f n123 = computeFaceNormal(p1, p2, p3);
+
 				normals[j * width + i] += n012 + n023 + n013;
 				normals[(j + 1) * width + i] += n012 + n013 + n123;
 				normals[(j + 1) * width + i + 1] += n012 + n023 + n123;
@@ -154,4 +155,9 @@ void ClothSystem::clearNormals()
 	for (auto normal : normals) {
 		normal = Vec3f(0.0, 0.0, 0.0);
 	}
+}
+
+void ClothSystem::sortParticles()
+{
+	return;
 }
