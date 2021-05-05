@@ -6,22 +6,23 @@
 
 class Ball {
 public:
-	Ball(double x, double y, double z, double r) :o({x, y, z}), r(r) {}
-	Ball(Vec3d o, double r): o(o), r(r) {}
+	Ball(float x, float y, float z, float r) :o({x, y, z}), r(r) {}
+	Ball(Vec3f o, float r): o(o), r(r) {}
 
-	Vec3d o;
-	double r;
+	Vec3f o;
+	float r;
 };
 
 class MetaBall
 {
 public:
-	MetaBall(int x, int y, int z, double cubeSize);
+	MetaBall(int x, int y, int z, float cubeSize);
 	~MetaBall();
 
 	void addBall(Ball ball);
+	std::vector<Ball>& getBalls();
 	void prepare(int degree);
-	void draw(double threshold);
+	void draw(float threshold);
 
 private:
 	MarchingCube* marchingCube;

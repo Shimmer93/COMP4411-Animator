@@ -33,8 +33,8 @@ ModelerView* createMyModel(int x, int y, int w, int h, char* label);
 Mat4f getModelViewMatrix();
 float getCurrentFrameArmAngle();
 float getCurrentFrameBodyHeight();
-void loadTextureFromBitmap(const char* imgName, int id, int mode);
-void loadTextureFromTGA(const char* imgName, int id, int mode);
+void loadTextureFromBitmap(const char* imgName, int id);
+void loadTextureFromTGA(const char* imgName, int id);
 void initTexture();
 void drawSurfaceOfRotation(double h, std::function<double(double)> curve);
 void drawBinaryLSystem(int numIter, std::function<void(int)> drawStart);
@@ -46,8 +46,15 @@ class MyModel : public ModelerView
 {
 public:
 	MyModel(int x, int y, int w, int h, char* label)
-		: ModelerView(x, y, w, h, label), initialized(false), metaBall(new MetaBall(50, 50, 50, 0.2))
+		: ModelerView(x, y, w, h, label), initialized(false)
 	{
+		metaBall = new MetaBall(50, 50, 50, 0.2);
+		metaBall->addBall(Ball(1.0, 1.0, 0.6, 0.6));
+		metaBall->addBall(Ball(1.0, 1.0, 1.4, 0.4));
+		metaBall->addBall(Ball(1.0, 1.0, 2.0, 0.3));
+		metaBall->addBall(Ball(1.0, 1.0, 2.4, 0.2));
+		metaBall->prepare(2);
+
 		vector<Force*> psForces;
 		psForces.push_back(new Gravity(5.0));
 		ps = new ParticleSystem(psForces, false);
@@ -59,17 +66,23 @@ public:
 		collision = new ParticleSystem(vector<Force*>(), true);
 		collision->addParticle(new Particle(0.1, Vec3f(-2, -2, 0), Vec3f(1, 1, 0), Vec3f(0, 0, 0)));
 		collision->addParticle(new Particle(0.2, Vec3f(2, 1, 0), Vec3f(-1, -0.5, 0), Vec3f(0, 0, 0)));
+
+		envTex = new MetaBall(30, 30, 30, 0.3);
+		envTex->addBall(Ball(5.0, 5.0, 5.0, 1.5));
+		envTex->addBall(Ball(5.0, 5.0, 5.0, 1.1));
+		envTex->addBall(Ball(5.0, 5.0, 5.0, 1.25));
 	}
 
-	void init();
 	virtual void draw();
 
 private:
 	bool initialized;
+
 	MetaBall* metaBall;
 	ParticleSystem* ps;
 	ClothSystem* cloth;
 	ParticleSystem* collision;
+	MetaBall* envTex;
 
 	void drawArmWithShoulder(int angle, double x, double y, double z);
 	void drawOriginal();
@@ -171,7 +184,7 @@ void loadTextureFromTGA(const char* imgName, int id)
 void initTexture() {
 	loadTextureFromBitmap("textures/Metal.bmp", TEXTURE_METAL);
 	loadTextureFromTGA("textures/Bubble.tga", TEXTURE_BUBBLE);
-	loadTextureFromTGA("textures/GreenBall.tga", TEXTURE_GREEN_BALL);
+	loadTextureFromBitmap("textures/Chrome.bmp", TEXTURE_CHROME);
 	loadTextureFromTGA("textures/LightFlare.tga", TEXTURE_LIGHT_FLARE);
 
 	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
@@ -417,20 +430,6 @@ void MyModel::drawArmWithShoulder(int angle, double x, double y, double z) {
 	glPopMatrix();
 }
 
-// Run once before start to draw
-void MyModel::init()
-{
-	initTexture();
-
-	metaBall->addBall(Ball(1.0, 1.0, 0.6, 0.6));
-	metaBall->addBall(Ball(1.0, 1.0, 1.4, 0.4));
-	metaBall->addBall(Ball(1.0, 1.0, 2.0, 0.3));
-	metaBall->addBall(Ball(1.0, 1.0, 2.4, 0.2));
-	metaBall->prepare(2);
-
-	initialized = true;
-}
-
 void MyModel::draw()
 {
 	// This call takes care of a lot of the nasty projection 
@@ -438,9 +437,10 @@ void MyModel::draw()
 	// projection matrix, don't bother with this ...
 	ModelerView::draw();
 
-	// Initialization
-	if (!initialized)
-		init();
+	if (!initialized) {
+		initTexture();
+		initialized = true;
+	}
 
 	// Texture
 	if (VAL(USE_TEXTURE) == 1) {
@@ -619,7 +619,17 @@ void MyModel::drawCollision()
 
 void MyModel::drawMetaball()
 {
-	return;
+	float dt = 1.0 / ModelerApplication::Instance()->GetFps();
+
+	vector<Ball>& balls = envTex->getBalls();
+	balls[0].o += Vec3f(0.4, 0.4, 0.0) * dt;
+	balls[1].o += Vec3f(-0.4, 0.2, -0.2) * dt;
+	balls[2].o += Vec3f(0.4, -0.4, 0.2) * dt;
+	envTex->prepare(2);
+	glPushMatrix();
+	glTranslatef(-5.0, -5.0, -5.0);
+	envTex->draw(1.5);
+	glPopMatrix();
 }
 
 int main()

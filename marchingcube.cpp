@@ -3,7 +3,9 @@
 #include <cmath>
 #include <FL/gl.h>
 
-MarchingCube::MarchingCube(int x, int y, int z, double cubeSize)
+#include "modelerdraw.h"
+
+MarchingCube::MarchingCube(int x, int y, int z, float cubeSize)
 	:x(x), y(y), z(z), cubeSize(cubeSize)
 {
 	vertices = new Vertex[x * y * z];
@@ -25,14 +27,14 @@ MarchingCube::~MarchingCube() {
 	delete[] vertices;
 }
 
-Vertex MarchingCube::interpVertex(const Vertex& v1, const Vertex& v2, double isoLevel) {
+Vertex MarchingCube::interpVertex(const Vertex& v1, const Vertex& v2, float isoLevel) {
 	Vertex v;
 
 	if (abs(isoLevel - v1.value) < 1e-5) return v1;
 	if (abs(isoLevel - v2.value) < 1e-5) return v2;
 	if (abs(v2.value - v1.value) < 1e-5) return v1;
 
-	double c = (isoLevel - v1.value) / (v2.value - v1.value);
+	float c = (isoLevel - v1.value) / (v2.value - v1.value);
 
 	v.point[0] = v1.point[0] + c * (v2.point[0] - v1.point[0]);
 	v.point[1] = v1.point[1] + c * (v2.point[1] - v1.point[1]);
@@ -45,7 +47,7 @@ Vertex MarchingCube::interpVertex(const Vertex& v1, const Vertex& v2, double iso
 	return v;
 }
 
-void MarchingCube::drawCube(int i, int j, int k, double isoLevel) {
+void MarchingCube::drawCube(int i, int j, int k, float isoLevel) {
 	if (i >= x-1 || j >= y-1 || k >= z-1) return;
 
 	// The index of vertices in the cube
@@ -77,24 +79,28 @@ void MarchingCube::drawCube(int i, int j, int k, double isoLevel) {
 		}
 	}
 
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-	glEnable(GL_NORMALIZE);
-
-	glBegin(GL_TRIANGLES);
 	for (int i = 0; i < 12; i+=3) {
 		if (triTable[cubeIndex][i] == -1) continue;
-		glNormal3dv(edgeVertices[triTable[cubeIndex][i]].normal.getPointer());
-		glVertex3dv(edgeVertices[triTable[cubeIndex][i]].point.getPointer());
-		glNormal3dv(edgeVertices[triTable[cubeIndex][i+1]].normal.getPointer());
-		glVertex3dv(edgeVertices[triTable[cubeIndex][i+1]].point.getPointer());
-		glNormal3dv(edgeVertices[triTable[cubeIndex][i+2]].normal.getPointer());
-		glVertex3dv(edgeVertices[triTable[cubeIndex][i+2]].point.getPointer());
+		glNormal3fv(edgeVertices[triTable[cubeIndex][i]].normal.getPointer());
+		glVertex3fv(edgeVertices[triTable[cubeIndex][i]].point.getPointer());
+		glNormal3fv(edgeVertices[triTable[cubeIndex][i+1]].normal.getPointer());
+		glVertex3fv(edgeVertices[triTable[cubeIndex][i+1]].point.getPointer());
+		glNormal3fv(edgeVertices[triTable[cubeIndex][i+2]].normal.getPointer());
+		glVertex3fv(edgeVertices[triTable[cubeIndex][i+2]].point.getPointer());
 	}
-	glEnd();
-
 }
 
-void MarchingCube::draw(double isoLevel) {
+void MarchingCube::draw(float isoLevel) {
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	glEnable(GL_NORMALIZE);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, TEXTURES[TEXTURE_CHROME]);
+	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+	glEnable(GL_TEXTURE_GEN_S);
+	glEnable(GL_TEXTURE_GEN_T);
+
+	glBegin(GL_TRIANGLES);
 	for (int k = 0; k < z-1; k++) {
 		for (int j = 0; j < y-1; j++) {
 			for (int i = 0; i < x-1; i++) {
@@ -102,6 +108,11 @@ void MarchingCube::draw(double isoLevel) {
 			}
 		}
 	}
+	glEnd();
+
+	glDisable(GL_TEXTURE_GEN_S);
+	glDisable(GL_TEXTURE_GEN_T);
+	glDisable(GL_TEXTURE_2D);
 }
 
 const int MarchingCube::getNumVertex() {
@@ -112,6 +123,13 @@ const Vec3i MarchingCube::getXYZ() {
 	return Vec3i{x, y, z};
 }
 
-const double MarchingCube::getCubeSize() {
+const float MarchingCube::getCubeSize() {
 	return cubeSize;
+}
+
+void MarchingCube::clearVertices() {
+	for (int i = 0; i < getNumVertex(); i++) {
+		vertices[i].normal = Vec3f(0.0, 0.0, 0.0);
+		vertices[i].value = 0;
+	}
 }
