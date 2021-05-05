@@ -49,6 +49,7 @@ public:
 	void drawControlPoint(int iCtrlPt) const;
 	void drawCurve(void) const;
 	void invalidate(void) const;
+	void onValueChanged() const { m_bDirty = true; reevaluate(); }
 
 	void toStream(std::ostream& output_stream) const;
 	void fromStream(std::istream& input_stream);

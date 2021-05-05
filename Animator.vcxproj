@@ -148,7 +148,9 @@
   <ItemGroup>
     <ClCompile Include="beziercurveevaluator.cpp" />
     <ClCompile Include="bsplinecurveevaluator.cpp" />
+    <ClCompile Include="c2splinecurveevaluator.cpp" />
     <ClCompile Include="catmullromcurveevaluator.cpp" />
+    <ClCompile Include="ClothSystem.cpp" />
     <ClCompile Include="curve.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -267,11 +269,14 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="tga.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="beziercurveevaluator.h" />
     <ClInclude Include="bsplinecurveevaluator.h" />
+    <ClInclude Include="c2splinecurveevaluator.h" />
     <ClInclude Include="catmullromcurveevaluator.h" />
+    <ClInclude Include="ClothSystem.h" />
     <ClInclude Include="curve.h" />
     <ClInclude Include="curveevaluator.h" />
     <ClInclude Include="force.h" />
@@ -295,6 +300,7 @@
     <ClInclude Include="rect.h" />
     <ClInclude Include="rulerwindow.h" />
     <ClInclude Include="mat.h" />
+    <ClInclude Include="tga.h" />
     <ClInclude Include="vec.h" />
   </ItemGroup>
   <ItemGroup>

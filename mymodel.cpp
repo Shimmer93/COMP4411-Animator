@@ -1,6 +1,7 @@
 // The sample model.  You should build a file
 // very similar to this for when you make your model.
 #include "bitmap.h"
+#include "tga.h"
 #include "modelerview.h"
 #include "modelerapp.h"
 #include "modelerdraw.h"
@@ -15,8 +16,11 @@
 #include "particleSystem.h"
 #include "mat.h"
 #include "force.h"
+#include "ClothSystem.h"
 
-const GLuint TID = 1;
+#include <iostream>
+using namespace std;
+
 int FRAME = 0;
 int MOOD_COUNT = 0;
 const int MAX_FRAME = 60;
@@ -29,7 +33,16 @@ class MyModel : public ModelerView
 public:
 	MyModel(int x, int y, int w, int h, char* label)
 		: ModelerView(x, y, w, h, label), initialized(false), metaBall(new MetaBall(50, 50, 50, 0.2))
-	{}
+	{
+		vector<Force*> forces;
+		forces.push_back(new TestForce());
+		cloth = new ClothSystem(forces, ModelerApplication::Instance()->GetFps(),
+			0.1, 50, 50, Vec3f(-2.5, -2.5, 0), 2.0, 0.5);
+
+		collision = new ParticleSystem(vector<Force*>(), ModelerApplication::Instance()->GetFps(), true);
+		collision->addParticle(new Particle(0.1, Vec3f(-2, -2, 0), Vec3f(1, 1, 0), Vec3f(0, 0, 0)));
+		collision->addParticle(new Particle(0.2, Vec3f(2, 1, 0), Vec3f(-1, -0.5, 0), Vec3f(0, 0, 0)));
+	}
 
 	void init();
 	virtual void draw();
@@ -38,8 +51,14 @@ public:
 private:
 	bool initialized;
 	MetaBall* metaBall;
+	ClothSystem* cloth;
+	ParticleSystem* collision;
 
 	void drawArmWithShoulder(int angle, double x, double y, double z);
+	void drawOriginal();
+	void drawCloth();
+	void drawCollision();
+	void drawMetaball();
 };
 
 // We need to make a creator function, mostly because of
@@ -102,22 +121,23 @@ float getCurrentFrameBodyHeight() {
 // Initialize the texture
 void initTexture() {
 	// Read the bitmap
-	char* imgName = "texture.bmp";
+	char* imgName = "textures/Bubble.tga";
 	int width, height;
 
-	unsigned char* data = readBMP(imgName, width, height);
+	unsigned char* data = readTGA(imgName, width, height);
+
 	// Load the bitmap into the texture
 	GLuint textureID;
-	glGenTextures(TID, &textureID);
+	glGenTextures(TEXTURE_ID, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	// Set parameters for the texture
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -414,18 +434,21 @@ void MyModel::drawModel()
 	if (!initialized)
 		init();
 
+	// Texture
+	if (VAL(USE_TEXTURE) == 1) {
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, TEXTURE_ID);
+	}
+	else {
+		glDisable(GL_TEXTURE_2D);
+	}
+
 	// Animation
 	bool isAnimated = false;//ModelerUserInterface::m_controlsAnimOnMenu->value();
 	if (!isAnimated) {
 		FRAME = 0;
 		MOOD_COUNT = 0;
 		MOOD = false;
-	}
-
-	// Texture
-	if (VAL(USE_TEXTURE) == 1) {
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, TID);
 	}
 
 	// layer 1: whole model
@@ -447,6 +470,46 @@ void MyModel::drawModel()
 		float light0spec[4] = { 0.0, 0.0, 0.0, 0.0 };
 		glLightfv(GL_LIGHT0, GL_SPECULAR, light0spec);
 	}
+	
+	switch (ModelerApplication::Instance()->GetUI()->getDrawMode()) {
+	case ORIGINAL:
+		drawOriginal();
+		break;
+	case CLOTH:
+		drawCloth();
+		break;
+	case COLLISION:
+		drawCollision();
+		break;
+	case METABALL:
+		drawMetaball();
+		break;
+	default:
+		break;
+	}
+
+	if (isAnimated) {
+		FRAME++;
+		FRAME %= MAX_FRAME;
+		if (VAL(MOOD_CYCLING) == 1) {
+			MOOD_COUNT++;
+			if (MOOD_COUNT >= MAX_MOOD_COUNT) {
+				MOOD = (MOOD) ? false : true;
+				MOOD_COUNT %= MAX_MOOD_COUNT;
+			}
+		}
+		else {
+			MOOD = false;
+			MOOD_COUNT = 0;
+		}
+	}
+}
+
+void MyModel::drawOriginal()
+{
+	
+	Mat4f cameraMatrix = getModelViewMatrix();
+	ParticleSystem* ps = ModelerApplication::Instance()->GetParticleSystem();
 
 	glPushMatrix();
 	glTranslated(VAL(XPOS), VAL(YPOS), VAL(ZPOS));
@@ -474,7 +537,7 @@ void MyModel::drawModel()
 	glPopMatrix();
 
 	Mat4f modelViewMatrix = getModelViewMatrix();
-	ps->spawnParticles(cameraMatrix, modelViewMatrix, 20);
+	ps->spawnParticles(cameraMatrix, modelViewMatrix, 10);
 
 	// layer 4: lower cylinder
 	glPushMatrix();
@@ -515,29 +578,34 @@ void MyModel::drawModel()
 		drawArmWithShoulder(270, -1.5, 1.2, 0);
 	}
 
+	ps->drawParticles(ModelerApplication::Instance()->GetTime());
 	glPopMatrix();
 
-	//ps->drawParticles(ModelerApplication::Instance()->GetTime());
 	if (ModelerApplication::Instance()->GetTime() == 0)
 		ps->clearParticles();
+}
 
-	if (isAnimated) {
-		FRAME++;
-		FRAME %= MAX_FRAME;
-		if (VAL(MOOD_CYCLING) == 1) {
-			MOOD_COUNT++;
-			if (MOOD_COUNT >= MAX_MOOD_COUNT) {
-				MOOD = (MOOD) ? false : true;
-				MOOD_COUNT %= MAX_MOOD_COUNT;
-			}
-		}
-		else {
-			MOOD = false;
-			MOOD_COUNT = 0;
-		}
+void MyModel::drawCloth()
+{
+	if (ModelerApplication::Instance()->GetParticleSystem() != cloth) {
+		ModelerApplication::Instance()->SetParticleSystem(cloth);
+		cloth->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
 	}
+	cloth->drawParticles(ModelerApplication::Instance()->GetTime());
+}
 
-	glDisable(GL_TEXTURE_2D);
+void MyModel::drawCollision()
+{
+	if (ModelerApplication::Instance()->GetParticleSystem() != collision) {
+		ModelerApplication::Instance()->SetParticleSystem(collision);
+		collision->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
+	}
+	collision->drawParticles(ModelerApplication::Instance()->GetTime());
+}
+
+void MyModel::drawMetaball()
+{
+	return;
 }
 
 	
@@ -601,7 +669,8 @@ int main()
 
 	vector<Force*> forces;
 	forces.push_back(new Gravity(5.0));
-	ParticleSystem* ps = new ParticleSystem(forces, ModelerApplication::Instance()->GetFps());
+	ParticleSystem* ps = new ParticleSystem(forces, ModelerApplication::Instance()->GetFps(), false);
+	ps->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
 
 	ModelerApplication::Instance()->SetParticleSystem(ps);
 	return ModelerApplication::Instance()->Run();

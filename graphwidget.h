@@ -118,6 +118,7 @@ protected:
 	int m_iEventToDo;
 	bool m_bHasEvent;
 	bool m_bLButtonDown;
+	bool m_bMButtonDown;
 	bool m_bRButtonDown;
 	bool m_bPanning;
 	int m_iMouseX, m_iMouseY, m_iMouseDX, m_iMouseDY;
@@ -167,6 +168,9 @@ protected:
 	void doCtrlPtSelection(const int iMouseX, const int iMouseY);
 	void endCtrlPtSelection(const int iMouseX, const int iMouseY);
 	void doPan(const int iMouseDX, const int iMouseDY);
+	void startTensionAdjustion(const int iMouseDY);
+	void doTensionAdjustion(const int iMouseDY);
+	void endTensionAdjustion(const int iMouseDY);
 
 	void curveType(int iCurve, int iCurveType);
 
