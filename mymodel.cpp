@@ -33,6 +33,7 @@ public:
 
 	void init();
 	virtual void draw();
+	void drawModel();
 
 private:
 	bool initialized;
@@ -380,7 +381,32 @@ void MyModel::draw()
 	// matrix stuff.  Unless you want to fudge directly with the 
 	// projection matrix, don't bother with this ...
 	ModelerView::draw();
-
+	if (VAL(MIRROR) == 1) {
+		glClearStencil(0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glDepthMask(false);
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 1);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glPushMatrix();
+		setDiffuseColor(1.0f, 1.0f, 1.0f);
+		glTranslated(-5, -5, 8);
+		drawBox(10, 10, 0.05);
+		glPopMatrix();
+		glDepthMask(true);
+		glStencilFunc(GL_EQUAL, 1, 1);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		glPushMatrix();
+		glTranslated(0, 0, 8);
+		glScalef(1.0f, 1.0f, -1.0f);
+		MyModel::drawModel();
+		glPopMatrix();
+		glDisable(GL_STENCIL_TEST);
+	}
+	MyModel::drawModel();
+}
+void MyModel::drawModel()
+{
 	Mat4f cameraMatrix = getModelViewMatrix();
 	ParticleSystem* ps = ModelerApplication::Instance()->GetParticleSystem();
 
@@ -407,8 +433,8 @@ void MyModel::draw()
 	setDiffuseColor(0.616, 0.753, 0.816);
 
 	// Lighting
-	float light0pos[4] = {VAL(LIGHT0_X), VAL(LIGHT0_Y), VAL(LIGHT0_Z), 0.0};
-	float light1pos[4] = {VAL(LIGHT1_X), VAL(LIGHT1_Y), VAL(LIGHT1_Z), 0.0};
+	float light0pos[4] = { VAL(LIGHT0_X), VAL(LIGHT0_Y), VAL(LIGHT0_Z), 0.0 };
+	float light1pos[4] = { VAL(LIGHT1_X), VAL(LIGHT1_Y), VAL(LIGHT1_Z), 0.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light0pos);
 	glLightfv(GL_LIGHT1, GL_POSITION, light1pos);
 	if (VAL(USE_SPECULAR) == 1) {
@@ -425,69 +451,69 @@ void MyModel::draw()
 	glPushMatrix();
 	glTranslated(VAL(XPOS), VAL(YPOS), VAL(ZPOS));
 	glScaled(VAL(XSCALE), VAL(YSCALE), VAL(ZSCALE));
-		
-		// layer 2: main body with cross
-		glPushMatrix();
-		glRotated(VAL(BODY_ROTATE_X), 1.0, 0.0, 0.0);
-		glRotated(VAL(BODY_ROTATE_Y), 0.0, 1.0, 0.0);
-		glRotated(VAL(BODY_ROTATE_Z), 0.0, 0.0, 1.0);
-		glTranslated(0.0, getCurrentFrameBodyHeight(), 0.0);
-		glTranslated(0.0, 0.0, 1.0);
-			glPushMatrix();
-			glRotated(270, 1.0, 0.0, 0.0);
-				// layer 4: middle cylinder
-				glPushMatrix();
-				glTranslated(0.0, 1.0, 0.0);
-				drawCylinder(0.5, 2.0, 2.0);
-				glPopMatrix();
 
-				// layer 4: upper cylinder
-				glPushMatrix();
-				glTranslated(0.0, 1.0, 0.5);
-				drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 5.0 / 9.0, 1.8, 1.2);
-				glPopMatrix();
+	// layer 2: main body with cross
+	glPushMatrix();
+	glRotated(VAL(BODY_ROTATE_X), 1.0, 0.0, 0.0);
+	glRotated(VAL(BODY_ROTATE_Y), 0.0, 1.0, 0.0);
+	glRotated(VAL(BODY_ROTATE_Z), 0.0, 0.0, 1.0);
+	glTranslated(0.0, getCurrentFrameBodyHeight(), 0.0);
+	glTranslated(0.0, 0.0, 1.0);
+	glPushMatrix();
+	glRotated(270, 1.0, 0.0, 0.0);
+	// layer 4: middle cylinder
+	glPushMatrix();
+	glTranslated(0.0, 1.0, 0.0);
+	drawCylinder(0.5, 2.0, 2.0);
+	glPopMatrix();
 
-				Mat4f modelViewMatrix = getModelViewMatrix();
-				ps->spawnParticles(cameraMatrix, modelViewMatrix, 20);
+	// layer 4: upper cylinder
+	glPushMatrix();
+	glTranslated(0.0, 1.0, 0.5);
+	drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 5.0 / 9.0, 1.8, 1.2);
+	glPopMatrix();
 
-				// layer 4: lower cylinder
-				glPushMatrix();
-				glTranslated(0.0, 1.0, (VAL(BODY_HEIGHT) - 0.5) * (-4.0) / 9.0);
-				drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 4.0 / 9.0, 1.2, 1.8);
-				glPopMatrix();
-			glPopMatrix();
+	Mat4f modelViewMatrix = getModelViewMatrix();
+	ps->spawnParticles(cameraMatrix, modelViewMatrix, 20);
 
-			// layer 3: cross
-			glPushMatrix();
-			setDiffuseColor(0.8, 0.8, 0.8);
-				
-				// layer 4: one stroke of cross
-				glPushMatrix();
-				glTranslated(-1.2, -0.4, 1.0);
-				glRotated(30, 0.0, 0.0, 1.0);
-				drawBox(2.4, 0.4, 0.2);
-				glPopMatrix();
+	// layer 4: lower cylinder
+	glPushMatrix();
+	glTranslated(0.0, 1.0, (VAL(BODY_HEIGHT) - 0.5) * (-4.0) / 9.0);
+	drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 4.0 / 9.0, 1.2, 1.8);
+	glPopMatrix();
+	glPopMatrix();
 
-				// layer 4: another stroke of cross
-				glPushMatrix();
-				glTranslated(-1.2, 0.8, 1.0);
-				glRotated(-30, 0.0, 0.0, 1.0);
-				drawBox(2.4, 0.4, 0.2);
-				glPopMatrix();
-			glPopMatrix();
-		glPopMatrix();
+	// layer 3: cross
+	glPushMatrix();
+	setDiffuseColor(0.8, 0.8, 0.8);
 
-		//layer 2: arms with shoulders
-		drawArmWithShoulder(45, 1.5, 1.2, 1.0);
-		drawArmWithShoulder(135, 1.5, 1.2, -1.0);
-		drawArmWithShoulder(225, -1.5, 1.2, -1.0);
-		drawArmWithShoulder(315, -1.5, 1.2, 1.0);
-		if (VAL(ARM_NUMBER) == 5)
-			drawArmWithShoulder(90, 1.5, 1.2, 0);
-		if (VAL(ARM_NUMBER) == 6) {
-			drawArmWithShoulder(90, 1.5, 1.2, 0);
-			drawArmWithShoulder(270, -1.5, 1.2, 0);
-		}
+	// layer 4: one stroke of cross
+	glPushMatrix();
+	glTranslated(-1.2, -0.4, 1.0);
+	glRotated(30, 0.0, 0.0, 1.0);
+	drawBox(2.4, 0.4, 0.2);
+	glPopMatrix();
+
+	// layer 4: another stroke of cross
+	glPushMatrix();
+	glTranslated(-1.2, 0.8, 1.0);
+	glRotated(-30, 0.0, 0.0, 1.0);
+	drawBox(2.4, 0.4, 0.2);
+	glPopMatrix();
+	glPopMatrix();
+	glPopMatrix();
+
+	//layer 2: arms with shoulders
+	drawArmWithShoulder(45, 1.5, 1.2, 1.0);
+	drawArmWithShoulder(135, 1.5, 1.2, -1.0);
+	drawArmWithShoulder(225, -1.5, 1.2, -1.0);
+	drawArmWithShoulder(315, -1.5, 1.2, 1.0);
+	if (VAL(ARM_NUMBER) == 5)
+		drawArmWithShoulder(90, 1.5, 1.2, 0);
+	if (VAL(ARM_NUMBER) == 6) {
+		drawArmWithShoulder(90, 1.5, 1.2, 0);
+		drawArmWithShoulder(270, -1.5, 1.2, 0);
+	}
 
 	glPopMatrix();
 
@@ -513,6 +539,9 @@ void MyModel::draw()
 
 	glDisable(GL_TEXTURE_2D);
 }
+
+	
+
 
 int main()
 {
@@ -566,6 +595,7 @@ int main()
 	controls[METABALL_THRESHOLD] = ModelerControl("Metaball Threshold", 0.1, 5.0, 0.1, 1.0);
 	controls[ARM_NUMBER] = ModelerControl("Amount of Arms", 4, 6, 1, 4);
 	controls[MOOD_CYCLING] = ModelerControl("Enable Mood Cycling?", 0, 1, 1, 0);
+	controls[MIRROR] = ModelerControl("Enable Mirror", 0, 1, 1, 0);
 
 	ModelerApplication::Instance()->Init(&createMyModel, controls, NUMCONTROLS);
 
