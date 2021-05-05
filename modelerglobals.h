@@ -35,6 +35,17 @@ enum MyModelDrawModes
 	ORIGINAL, CLOTH, COLLISION, METABALL
 };
 
+enum Textures
+{
+	TEXTURE_METAL = 0,
+	TEXTURE_BUBBLE,
+	TEXTURE_LIGHT_FLARE,
+	TEXTURE_GREEN_BALL,
+	NUM_TEXTURES
+};
+
+extern unsigned int TEXTURES[NUM_TEXTURES];
+
 // Colors
 #define COLOR_RED		1.0f, 0.0f, 0.0f
 #define COLOR_GREEN		0.0f, 1.0f, 0.0f

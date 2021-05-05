@@ -22,9 +22,9 @@ float frand() {
  * Constructors
  ***************/
 
-ParticleSystem::ParticleSystem(vector<Force*> forces, float fps, bool collide)
+ParticleSystem::ParticleSystem(vector<Force*> forces, bool collide)
 	: camera(nullptr), particles(), baked_data(), forces(forces),
-	  bake_fps(fps), bake_start_time(0.0), bake_end_time(0.0), simulate(false), dirty(false), collide(collide)
+	  bake_fps(-1), bake_start_time(0.0), bake_end_time(0.0), simulate(false), dirty(false), collide(collide)
 {}
 
 
@@ -91,6 +91,7 @@ void ParticleSystem::resetSimulation(float t)
 /** Compute forces and update particles **/
 void ParticleSystem::computeForcesAndUpdateParticles(float t)
 {
+	if (bake_fps <= 0) return;
 
 	float prev_t = t - 1.0 / bake_fps;
 

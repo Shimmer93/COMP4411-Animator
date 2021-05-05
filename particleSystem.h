@@ -35,7 +35,7 @@ public:
 
 
 	/** Constructor **/
-	ParticleSystem(vector<Force*> forces, float fps, bool collide);
+	ParticleSystem(vector<Force*> forces, bool collide);
 
 	/** Destructor **/
 	virtual ~ParticleSystem();
@@ -82,6 +82,7 @@ public:
 	float getBakeStartTime() { return bake_start_time; }
 	float getBakeEndTime() { return bake_end_time; }
 	float getBakeFps() { return bake_fps; }
+	void setFps(float fps) { bake_fps = fps; }
 	bool isSimulate() { return simulate; }
 	bool isDirty() { return dirty; }
 	void setDirty(bool d) { dirty = d; }

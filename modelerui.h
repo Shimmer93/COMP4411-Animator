@@ -101,6 +101,8 @@ private:
 	static void cb_collision(Fl_Menu_*, void*);
 	inline void cb_metaball_i(Fl_Menu_*, void*);
 	static void cb_metaball(Fl_Menu_*, void*);
+	inline void cb_original_i(Fl_Menu_*, void*);
+	static void cb_original(Fl_Menu_*, void*);
 	inline void cb_fps_i(Fl_Slider*, void*);
 	static void cb_fps(Fl_Slider*, void*);
 	inline void cb_m_modelerWindow_i(Fl_Window*, void*);

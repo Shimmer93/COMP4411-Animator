@@ -1,4 +1,5 @@
 #include "marchingcube.h"
+#include "modelerglobals.h"
 #include <cmath>
 #include <FL/gl.h>
 

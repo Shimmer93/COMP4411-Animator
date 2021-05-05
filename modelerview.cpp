@@ -127,7 +127,9 @@ void ModelerView::draw()
 		ps->computeForcesAndUpdateParticles(t);
 		ps->drawParticles(t);
 	}*/
-	ModelerApplication::Instance()->GetParticleSystem()->sortParticles();
+	ParticleSystem* ps = ModelerApplication::Instance()->GetParticleSystem();
+	if(ps != nullptr)
+		ps->sortParticles();
 }
 
 

@@ -46,6 +46,7 @@ public:
   static Fl_Menu_Item *m_pmiShowCloth;
   static Fl_Menu_Item *m_pmiShowCollision;
   static Fl_Menu_Item *m_pmiShowMetaball;
+  static Fl_Menu_Item* m_pmiShowOriginal;
   Fl_Browser *m_pbrsBrowser;
   Fl_Tabs *m_ptabTab;
   Fl_Scroll *m_pscrlScroll;

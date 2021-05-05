@@ -5,9 +5,9 @@ using namespace std;
 
 #define SQRT2 1.41421356237
 
-ClothSystem::ClothSystem(vector<Force*> forces, float fps, float gridSize, int height, int width, 
+ClothSystem::ClothSystem(vector<Force*> forces, float gridSize, int height, int width, 
 	  Vec3f startPoint, float ks, float kd)
-	: ParticleSystem(forces, fps, false), gridSize(gridSize), height(height), width(width)
+	: ParticleSystem(forces, false), gridSize(gridSize), height(height), width(width)
 {
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
@@ -97,6 +97,9 @@ void ClothSystem::drawParticles(float t)
 				normals[j * width + i].normalize();
 			}
 		}
+
+		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+		glEnable(GL_NORMALIZE);
 
 		for (int j = 0; j < height - 1; j++) {
 			for (int i = 0; i < width - 1; i++) {

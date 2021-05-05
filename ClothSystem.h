@@ -4,7 +4,7 @@
 class ClothSystem : public ParticleSystem
 {
 public:
-	ClothSystem(vector<Force*> forces, float fps, float gridSize, int height, int width, Vec3f startPoint, float ks, float kd);
+	ClothSystem(vector<Force*> forces, float gridSize, int height, int width, Vec3f startPoint, float ks, float kd);
 
 	void drawParticles(float t);
 	void computeForcesAndUpdateParticles(float t);
