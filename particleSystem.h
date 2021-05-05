@@ -20,6 +20,7 @@
 #include "mat.h"
 #include "particle.h"
 #include "force.h"
+#include "camera.h"
 #include <functional>
 #include <vector>
 #include <map>
@@ -34,7 +35,7 @@ public:
 
 
 	/** Constructor **/
-	ParticleSystem(vector<Force*> forces, float fps);
+	ParticleSystem(vector<Force*> forces, float fps, bool collide);
 
 	/** Destructor **/
 	virtual ~ParticleSystem();
@@ -72,7 +73,10 @@ public:
 
 	virtual void clearParticles();
 
-	virtual Vec3f applyForces(const Particle* par, float t);
+	virtual void sortParticles();
+
+	virtual void addParticle(Particle* par);
+
 
 	// These accessor fxns are implemented for you
 	float getBakeStartTime() { return bake_start_time; }
@@ -82,10 +86,12 @@ public:
 	bool isDirty() { return dirty; }
 	void setDirty(bool d) { dirty = d; }
 	bool isBaked() { return !baked_data.empty(); }
+	void setCamera(Camera* camera) { this->camera = camera; }
 
 
 protected:
-	
+	Camera* camera;
+
 	vector<Particle*> particles;
 	map<float, vector<Particle*>> baked_data;
 
@@ -101,7 +107,11 @@ protected:
 	/** General state variables **/
 	bool simulate;						// flag for simulation mode
 	bool dirty;							// flag for updating ui (don't worry about this)
+	bool collide;
 
+	void applyForces(Particle* par, float t);
+	bool compareParticles(const Particle* par1, const Particle* par2);
+	void detectCollision(float thresh);
 };
 
 

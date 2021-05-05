@@ -43,6 +43,9 @@ public:
   static Fl_Menu_Item *m_pmiLowQuality;
   static Fl_Menu_Item *m_pmiPoorQuality;
   static Fl_Menu_Item *m_pmiSetAniLen;
+  static Fl_Menu_Item *m_pmiShowCloth;
+  static Fl_Menu_Item *m_pmiShowCollision;
+  static Fl_Menu_Item *m_pmiShowMetaball;
   Fl_Browser *m_pbrsBrowser;
   Fl_Tabs *m_ptabTab;
   Fl_Scroll *m_pscrlScroll;

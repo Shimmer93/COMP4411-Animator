@@ -13,6 +13,7 @@
 #include "modelerapp.h"
 #include "particleSystem.h"
 #include "modeleruiwindows.h"
+#include "modelerglobals.h"
 
 class ModelerUI : public ModelerUIWindows
 {
@@ -41,6 +42,7 @@ public:
 	void simulate(bool bSimulate);
 	void redrawModelerView();
     void autoLoadNPlay();
+	int getDrawMode();
 
 protected:
 
@@ -63,6 +65,7 @@ private:
 	float m_fPlayStartTime, m_fPlayEndTime;
 	std::string m_strMovieFileName;
 	int m_iMovieFrameNum;
+	int m_iDrawMode;
 
 	inline void cb_openAniScript_i(Fl_Menu_*, void*);
 	static void cb_openAniScript(Fl_Menu_*, void*);
@@ -92,6 +95,12 @@ private:
 	static void cb_poor(Fl_Menu_*, void*);
 	inline void cb_aniLen_i(Fl_Menu_*, void*);
 	static void cb_aniLen(Fl_Menu_*, void*);
+	inline void cb_cloth_i(Fl_Menu_*, void*);
+	static void cb_cloth(Fl_Menu_*, void*);
+	inline void cb_collision_i(Fl_Menu_*, void*);
+	static void cb_collision(Fl_Menu_*, void*);
+	inline void cb_metaball_i(Fl_Menu_*, void*);
+	static void cb_metaball(Fl_Menu_*, void*);
 	inline void cb_fps_i(Fl_Slider*, void*);
 	static void cb_fps(Fl_Slider*, void*);
 	inline void cb_m_modelerWindow_i(Fl_Window*, void*);

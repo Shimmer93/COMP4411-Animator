@@ -8,16 +8,16 @@
   - [x] Bezier Curve
   - [x] B-Spline Curve
   - [x] Catmull-Rom Curve
-- [ ] Particle system
+- [x] Particle system
 
 
 
 ## Bells & Whistles
 
-- [ ] (1W) Enhance the spline options
-- [ ] (1W) Support of TGA file format
+- [x] (1W) Enhance the spline options (tension adjustion)
+- [x] (1W) Support of TGA file format
 - [ ] (1W) Render a mirror
-- [ ] (1W) Billboarding
+- [x] (1W) Billboarding
 - [ ] (1W each) Use billboarding to render the following:
   - [ ] Fire
   - [ ] Snow
@@ -37,7 +37,7 @@
 - [ ] (1B1W) Lens flare
 - [ ] (1B1W, vary) New interface
 - [ ] (2B) Flocking behaviors of particles
-- [ ] (2B) C2-Interpolating curve
+- [x] (2B) C2-Interpolating curve
 - [ ] (2B) Edit Catmull-Rom curves using inner Bezier control points
 - [ ] (2B) Picking a part in the model hierarchy
 - [ ] (2B) Avoid gimbal lock

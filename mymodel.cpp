@@ -1,6 +1,7 @@
 // The sample model.  You should build a file
 // very similar to this for when you make your model.
 #include "bitmap.h"
+#include "tga.h"
 #include "modelerview.h"
 #include "modelerapp.h"
 #include "modelerdraw.h"
@@ -15,8 +16,11 @@
 #include "particleSystem.h"
 #include "mat.h"
 #include "force.h"
+#include "ClothSystem.h"
 
-const GLuint TID = 1;
+#include <iostream>
+using namespace std;
+
 int FRAME = 0;
 int MOOD_COUNT = 0;
 const int MAX_FRAME = 60;
@@ -29,7 +33,16 @@ class MyModel : public ModelerView
 public:
 	MyModel(int x, int y, int w, int h, char* label)
 		: ModelerView(x, y, w, h, label), initialized(false), metaBall(new MetaBall(50, 50, 50, 0.2))
-	{}
+	{
+		vector<Force*> forces;
+		forces.push_back(new TestForce());
+		cloth = new ClothSystem(forces, ModelerApplication::Instance()->GetFps(),
+			0.1, 50, 50, Vec3f(-2.5, -2.5, 0), 2.0, 0.5);
+
+		collision = new ParticleSystem(vector<Force*>(), ModelerApplication::Instance()->GetFps(), true);
+		collision->addParticle(new Particle(0.1, Vec3f(-2, -2, 0), Vec3f(1, 1, 0), Vec3f(0, 0, 0)));
+		collision->addParticle(new Particle(0.2, Vec3f(2, 1, 0), Vec3f(-1, -0.5, 0), Vec3f(0, 0, 0)));
+	}
 
 	void init();
 	virtual void draw();
@@ -37,8 +50,14 @@ public:
 private:
 	bool initialized;
 	MetaBall* metaBall;
+	ClothSystem* cloth;
+	ParticleSystem* collision;
 
 	void drawArmWithShoulder(int angle, double x, double y, double z);
+	void drawOriginal();
+	void drawCloth();
+	void drawCollision();
+	void drawMetaball();
 };
 
 // We need to make a creator function, mostly because of
@@ -101,22 +120,23 @@ float getCurrentFrameBodyHeight() {
 // Initialize the texture
 void initTexture() {
 	// Read the bitmap
-	char* imgName = "texture.bmp";
+	char* imgName = "textures/Bubble.tga";
 	int width, height;
 
-	unsigned char* data = readBMP(imgName, width, height);
+	unsigned char* data = readTGA(imgName, width, height);
+
 	// Load the bitmap into the texture
 	GLuint textureID;
-	glGenTextures(TID, &textureID);
+	glGenTextures(TEXTURE_ID, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	// Set parameters for the texture
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -381,12 +401,18 @@ void MyModel::draw()
 	// projection matrix, don't bother with this ...
 	ModelerView::draw();
 
-	Mat4f cameraMatrix = getModelViewMatrix();
-	ParticleSystem* ps = ModelerApplication::Instance()->GetParticleSystem();
-
 	// Initialization
 	if (!initialized)
 		init();
+
+	// Texture
+	if (VAL(USE_TEXTURE) == 1) {
+		glEnable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, TEXTURE_ID);
+	}
+	else {
+		glDisable(GL_TEXTURE_2D);
+	}
 
 	// Animation
 	bool isAnimated = false;//ModelerUserInterface::m_controlsAnimOnMenu->value();
@@ -394,12 +420,6 @@ void MyModel::draw()
 		FRAME = 0;
 		MOOD_COUNT = 0;
 		MOOD = false;
-	}
-
-	// Texture
-	if (VAL(USE_TEXTURE) == 1) {
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, TID);
 	}
 
 	// layer 1: whole model
@@ -421,79 +441,23 @@ void MyModel::draw()
 		float light0spec[4] = { 0.0, 0.0, 0.0, 0.0 };
 		glLightfv(GL_LIGHT0, GL_SPECULAR, light0spec);
 	}
-
-	glPushMatrix();
-	glTranslated(VAL(XPOS), VAL(YPOS), VAL(ZPOS));
-	glScaled(VAL(XSCALE), VAL(YSCALE), VAL(ZSCALE));
-		
-		// layer 2: main body with cross
-		glPushMatrix();
-		glRotated(VAL(BODY_ROTATE_X), 1.0, 0.0, 0.0);
-		glRotated(VAL(BODY_ROTATE_Y), 0.0, 1.0, 0.0);
-		glRotated(VAL(BODY_ROTATE_Z), 0.0, 0.0, 1.0);
-		glTranslated(0.0, getCurrentFrameBodyHeight(), 0.0);
-		glTranslated(0.0, 0.0, 1.0);
-			glPushMatrix();
-			glRotated(270, 1.0, 0.0, 0.0);
-				// layer 4: middle cylinder
-				glPushMatrix();
-				glTranslated(0.0, 1.0, 0.0);
-				drawCylinder(0.5, 2.0, 2.0);
-				glPopMatrix();
-
-				// layer 4: upper cylinder
-				glPushMatrix();
-				glTranslated(0.0, 1.0, 0.5);
-				drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 5.0 / 9.0, 1.8, 1.2);
-				glPopMatrix();
-
-				Mat4f modelViewMatrix = getModelViewMatrix();
-				ps->spawnParticles(cameraMatrix, modelViewMatrix, 20);
-
-				// layer 4: lower cylinder
-				glPushMatrix();
-				glTranslated(0.0, 1.0, (VAL(BODY_HEIGHT) - 0.5) * (-4.0) / 9.0);
-				drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 4.0 / 9.0, 1.2, 1.8);
-				glPopMatrix();
-			glPopMatrix();
-
-			// layer 3: cross
-			glPushMatrix();
-			setDiffuseColor(0.8, 0.8, 0.8);
-				
-				// layer 4: one stroke of cross
-				glPushMatrix();
-				glTranslated(-1.2, -0.4, 1.0);
-				glRotated(30, 0.0, 0.0, 1.0);
-				drawBox(2.4, 0.4, 0.2);
-				glPopMatrix();
-
-				// layer 4: another stroke of cross
-				glPushMatrix();
-				glTranslated(-1.2, 0.8, 1.0);
-				glRotated(-30, 0.0, 0.0, 1.0);
-				drawBox(2.4, 0.4, 0.2);
-				glPopMatrix();
-			glPopMatrix();
-		glPopMatrix();
-
-		//layer 2: arms with shoulders
-		drawArmWithShoulder(45, 1.5, 1.2, 1.0);
-		drawArmWithShoulder(135, 1.5, 1.2, -1.0);
-		drawArmWithShoulder(225, -1.5, 1.2, -1.0);
-		drawArmWithShoulder(315, -1.5, 1.2, 1.0);
-		if (VAL(ARM_NUMBER) == 5)
-			drawArmWithShoulder(90, 1.5, 1.2, 0);
-		if (VAL(ARM_NUMBER) == 6) {
-			drawArmWithShoulder(90, 1.5, 1.2, 0);
-			drawArmWithShoulder(270, -1.5, 1.2, 0);
-		}
-
-	glPopMatrix();
-
-	//ps->drawParticles(ModelerApplication::Instance()->GetTime());
-	if (ModelerApplication::Instance()->GetTime() == 0)
-		ps->clearParticles();
+	
+	switch (ModelerApplication::Instance()->GetUI()->getDrawMode()) {
+	case ORIGINAL:
+		drawOriginal();
+		break;
+	case CLOTH:
+		drawCloth();
+		break;
+	case COLLISION:
+		drawCollision();
+		break;
+	case METABALL:
+		drawMetaball();
+		break;
+	default:
+		break;
+	}
 
 	if (isAnimated) {
 		FRAME++;
@@ -510,8 +474,109 @@ void MyModel::draw()
 			MOOD_COUNT = 0;
 		}
 	}
+}
 
-	glDisable(GL_TEXTURE_2D);
+void MyModel::drawOriginal()
+{
+	
+	Mat4f cameraMatrix = getModelViewMatrix();
+	ParticleSystem* ps = ModelerApplication::Instance()->GetParticleSystem();
+
+	glPushMatrix();
+	glTranslated(VAL(XPOS), VAL(YPOS), VAL(ZPOS));
+	glScaled(VAL(XSCALE), VAL(YSCALE), VAL(ZSCALE));
+
+	// layer 2: main body with cross
+	glPushMatrix();
+	glRotated(VAL(BODY_ROTATE_X), 1.0, 0.0, 0.0);
+	glRotated(VAL(BODY_ROTATE_Y), 0.0, 1.0, 0.0);
+	glRotated(VAL(BODY_ROTATE_Z), 0.0, 0.0, 1.0);
+	glTranslated(0.0, getCurrentFrameBodyHeight(), 0.0);
+	glTranslated(0.0, 0.0, 1.0);
+	glPushMatrix();
+	glRotated(270, 1.0, 0.0, 0.0);
+	// layer 4: middle cylinder
+	glPushMatrix();
+	glTranslated(0.0, 1.0, 0.0);
+	drawCylinder(0.5, 2.0, 2.0);
+	glPopMatrix();
+
+	// layer 4: upper cylinder
+	glPushMatrix();
+	glTranslated(0.0, 1.0, 0.5);
+	drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 5.0 / 9.0, 1.8, 1.2);
+	glPopMatrix();
+
+	Mat4f modelViewMatrix = getModelViewMatrix();
+	ps->spawnParticles(cameraMatrix, modelViewMatrix, 10);
+
+	// layer 4: lower cylinder
+	glPushMatrix();
+	glTranslated(0.0, 1.0, (VAL(BODY_HEIGHT) - 0.5) * (-4.0) / 9.0);
+	drawCylinder((VAL(BODY_HEIGHT) - 0.5) * 4.0 / 9.0, 1.2, 1.8);
+	glPopMatrix();
+	glPopMatrix();
+
+	// layer 3: cross
+	glPushMatrix();
+	setDiffuseColor(0.8, 0.8, 0.8);
+
+	// layer 4: one stroke of cross
+	glPushMatrix();
+	glTranslated(-1.2, -0.4, 1.0);
+	glRotated(30, 0.0, 0.0, 1.0);
+	drawBox(2.4, 0.4, 0.2);
+	glPopMatrix();
+
+	// layer 4: another stroke of cross
+	glPushMatrix();
+	glTranslated(-1.2, 0.8, 1.0);
+	glRotated(-30, 0.0, 0.0, 1.0);
+	drawBox(2.4, 0.4, 0.2);
+	glPopMatrix();
+	glPopMatrix();
+	glPopMatrix();
+
+	//layer 2: arms with shoulders
+	drawArmWithShoulder(45, 1.5, 1.2, 1.0);
+	drawArmWithShoulder(135, 1.5, 1.2, -1.0);
+	drawArmWithShoulder(225, -1.5, 1.2, -1.0);
+	drawArmWithShoulder(315, -1.5, 1.2, 1.0);
+	if (VAL(ARM_NUMBER) == 5)
+		drawArmWithShoulder(90, 1.5, 1.2, 0);
+	if (VAL(ARM_NUMBER) == 6) {
+		drawArmWithShoulder(90, 1.5, 1.2, 0);
+		drawArmWithShoulder(270, -1.5, 1.2, 0);
+	}
+
+	ps->drawParticles(ModelerApplication::Instance()->GetTime());
+	glPopMatrix();
+
+	if (ModelerApplication::Instance()->GetTime() == 0)
+		ps->clearParticles();
+}
+
+void MyModel::drawCloth()
+{
+	if (ModelerApplication::Instance()->GetParticleSystem() != cloth) {
+		ModelerApplication::Instance()->SetParticleSystem(cloth);
+		cloth->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
+	}
+	cloth->drawParticles(ModelerApplication::Instance()->GetTime());
+}
+
+void MyModel::drawCollision()
+{
+	if (ModelerApplication::Instance()->GetParticleSystem() != collision) {
+		ModelerApplication::Instance()->SetParticleSystem(collision);
+		collision->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
+	}
+	collision->drawParticles(ModelerApplication::Instance()->GetTime());
+}
+
+void MyModel::drawMetaball()
+{
+	return;
 }
 
 int main()
@@ -571,7 +636,8 @@ int main()
 
 	vector<Force*> forces;
 	forces.push_back(new Gravity(5.0));
-	ParticleSystem* ps = new ParticleSystem(forces, ModelerApplication::Instance()->GetFps());
+	ParticleSystem* ps = new ParticleSystem(forces, ModelerApplication::Instance()->GetFps(), false);
+	ps->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
 
 	ModelerApplication::Instance()->SetParticleSystem(ps);
 	return ModelerApplication::Instance()->Run();
