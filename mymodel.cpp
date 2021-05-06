@@ -61,7 +61,7 @@ public:
 
 		vector<Force*> clothForces;
 		clothForces.push_back(new TestForce());
-		cloth = new ClothSystem(clothForces, 0.1, 50, 50, Vec3f(-2.5, -2.5, 0), 2.0, 0.5);
+		cloth = new ClothSystem(clothForces, 0.1, 50, 50, Vec3f(-2.5, -2.5, 0), 5.0, 1.0);
 
 		collision = new ParticleSystem(vector<Force*>(), true);
 		collision->addParticle(new Particle(0.1, Vec3f(-2, -2, 0), Vec3f(1, 1, 0), Vec3f(0, 0, 0)));
