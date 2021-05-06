@@ -93,28 +93,11 @@ void ParticleSystem::computeForcesAndUpdateParticles(float t)
 {
 	if (bake_fps <= 0) return;
 
-	float dt = 1.0 / bake_fps;
-	float prev_t = t - dt;
-
 	if (collide)
 		detectCollision(0.2+1e-6);
 
-	for (auto par : particles) {
-		applyForces(par, prev_t);
-		/*par->p += (1.0 / bake_fps) * par->v;
-		par->v += (1.0 / bake_fps) * par->f / par->m;*/
-		Vec3f dp1 = dt * par->v;
-		Vec3f dv1 = dt * par->f / par->m;
-		Particle* temp_par = new Particle(*par);
-		temp_par->p += dp1;
-		temp_par->v += dv1;
-		applyForces(temp_par, t);
-		Vec3f dp2 = dt * temp_par->v;
-		Vec3f dv2 = dt * temp_par->f / temp_par->m;
-		par->p += (dp1 + dp2) * 0.5;
-		par->v += (dv1 + dv2) * 0.5;
-		delete temp_par;
-	}
+	for (auto par : particles)
+		updateParticle(par, t, true);
 
 	if (simulate)
 		bakeParticles(t);
@@ -174,9 +157,30 @@ void ParticleSystem::clearParticles()
 	particles.clear();
 }
 
-void ParticleSystem::applyForces(Particle* par, float t)
+void ParticleSystem::updateParticle(Particle* par, float t, bool clear)
 {
-	par->f = Vec3f(0.0, 0.0, 0.0);
+	float dt = 1.0 / bake_fps;
+	float prev_t = t - dt;
+
+	applyForces(par, prev_t, clear);
+	Vec3f dp1 = dt * par->v;
+	Vec3f dv1 = dt * par->f / par->m;
+	Particle temp_par(*par);
+	temp_par.p += dp1;
+	temp_par.v += dv1;
+	applyForces(&temp_par, t, true);
+	Vec3f dp2 = dt * temp_par.v;
+	Vec3f dv2 = dt * temp_par.f / temp_par.m;
+	par->p += (dp1 + dp2) * 0.5;
+	par->v += (dv1 + dv2) * 0.5;
+}
+
+void ParticleSystem::applyForces(Particle* par, float t, bool clear)
+{
+	if(clear)
+		par->f = Vec3f(0.0, 0.0, 0.0);
+	if (forces.empty())
+		return;
 	for (auto force : forces)
 		par->f += force->apply(par, t);
 }

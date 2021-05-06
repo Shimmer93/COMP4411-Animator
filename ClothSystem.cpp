@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-#define SQRT2 1.41421356237
+#define SQRT2 1.414213562373095
 
 ClothSystem::ClothSystem(vector<Force*> forces, float gridSize, int height, int width, 
 	  Vec3f startPoint, float ks, float kd)
@@ -11,7 +11,7 @@ ClothSystem::ClothSystem(vector<Force*> forces, float gridSize, int height, int 
 {
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			particles.push_back(new Particle(0.1, startPoint + Vec3f(i * gridSize, j * gridSize, 0),
+			particles.push_back(new Particle(0.1, startPoint + Vec3f(i * gridSize, 0, j * gridSize),
 				Vec3f(0, 0, 0), Vec3f(0, 0, 0)));
 			normals.push_back(Vec3f(0.0, 0.0, 0.0));
 		}
@@ -39,24 +39,18 @@ ClothSystem::ClothSystem(vector<Force*> forces, float gridSize, int height, int 
 
 void ClothSystem::computeForcesAndUpdateParticles(float t)
 {
-	float prev_t = t - 1.0 / bake_fps;
+	if (bake_fps <= 0) return;
 
 	for (auto par : particles)
-		applyForces(par, prev_t);
+		par->f = Vec3f(0.0, 0.0, 0.0);
 
 	for (auto spring : springs)
 		spring->apply();
 
-	particles[height * width - 1]->f = Vec3f(0.0, 0.0, 0.0);
+	//particles[height * width - 1]->f = Vec3f(0.0, 0.0, 0.0);
 
-	/*cout << "force: " << particles[(height - 2) * width]->f << "\t";
-	cout << "velocity: " << particles[(height - 2) * width]->v << "\t";
-	cout << "position: " << particles[(height - 2) * width]->p << endl;*/
-
-	for (auto par : particles) {
-		par->p += (1.0 / bake_fps) * par->v;
-		par->v += (1.0 / bake_fps) * par->f / par->m;
-	}
+	for (auto par : particles)
+		updateParticle(par, t, false);
 
 	if (simulate)
 		bakeParticles(t);
@@ -123,13 +117,6 @@ void ClothSystem::drawParticles(float t)
 				glNormal3d(n3[0], n3[1], n3[2]);
 				glVertex3d(p3[0], p3[1], p3[2]);
 				glEnd();
-
-				/*glBegin(GL_TRIANGLES);
-				glNormal3d(n2[0], n2[1], n2[2]);
-				glVertex3d(p2[0], p2[1], p2[2]);
-				glNormal3d(n0[0], n0[1], n0[2]);
-				glVertex3d(p0[0], p0[1], p0[2]);
-				glEnd();*/
 			}
 		}
 	}

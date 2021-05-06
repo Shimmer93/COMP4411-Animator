@@ -89,7 +89,6 @@ public:
 	bool isBaked() { return !baked_data.empty(); }
 	void setCamera(Camera* camera) { this->camera = camera; }
 
-
 protected:
 	Camera* camera;
 
@@ -110,7 +109,8 @@ protected:
 	bool dirty;							// flag for updating ui (don't worry about this)
 	bool collide;
 
-	void applyForces(Particle* par, float t);
+	void updateParticle(Particle* par, float t, bool clear);
+	void applyForces(Particle* par, float t, bool clear);
 	bool compareParticles(const Particle* par1, const Particle* par2);
 	void detectCollision(float thresh);
 };
