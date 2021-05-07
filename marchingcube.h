@@ -9,22 +9,23 @@ class Vertex {
 public:
 	Vertex() : point{0.0, 0.0, 0.0}, normal{0.0, 0.0, 0.0}, value(0.0){}
 
-	Vec3d point;
-	Vec3d normal;
-	double value;
+	Vec3f point;
+	Vec3f normal;
+	float value;
 };
 
 class MarchingCube
 {
 public:
-	MarchingCube(int x, int y, int z, double cubeSize);
+	MarchingCube(int x, int y, int z, float cubeSize);
 	~MarchingCube();
 
-	void draw(double isoLevel);
-	void drawCube(int i, int j, int k, double isoLevel);
+	void draw(float isoLevel);
+	void drawCube(int i, int j, int k, float isoLevel);
 	const int getNumVertex();
 	const Vec3i getXYZ();
-	const double getCubeSize();
+	const float getCubeSize();
+	void clearVertices();
 
 	Vertex* vertices;
 
@@ -33,9 +34,9 @@ private:
 	int x;
 	int y;
 	int z;
-	double cubeSize;
+	float cubeSize;
 
-	Vertex interpVertex(const Vertex& v1, const Vertex& v2, double isoLevel);
+	Vertex interpVertex(const Vertex& v1, const Vertex& v2, float isoLevel);
 };
 
 const int endPointTable[12][2] = {

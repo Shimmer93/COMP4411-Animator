@@ -10,13 +10,14 @@ using namespace std;
 void Particle::draw(const Vec3f& camPos) {
 	if (p[0] > -10 && p[0]<10 && p[1]>-10 && p[1]<10 && p[2]>-10 && p[2] < 10) {
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, TEXTURE_ID);
+		glBindTexture(GL_TEXTURE_2D, TEXTURES[TEXTURE_BUBBLE]);
 
 		Vec3f objToCamProj, objToCam, upAux;
 		Vec3f lookAt(0, 0, 1);
 		float angleCos;
 
 		glPushMatrix();
+		setDiffuseColor(1.0, 1.0, 1.0);
 		glTranslatef(p[0], p[1], p[2]);
 
 			glPushMatrix();
@@ -56,11 +57,6 @@ void Particle::draw(const Vec3f& camPos) {
 		glPopMatrix();
 
 		glDisable(GL_TEXTURE_2D);
-
-		/*glPushMatrix();
-		glTranslatef(p[0], p[1], p[2]);
-		drawSphere(0.1);
-		glPopMatrix();*/
 
 	}
 }

@@ -26,6 +26,7 @@ void C2SplineCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 	const int numPt = ctrlPts.size();
 	if (numPt < 2) return;
 
+	// used matrices
 	float* xdiffs = new float[numPt];
 	float* xgammas = new float[numPt];
 	float* xsigmas = new float[numPt];
@@ -35,6 +36,7 @@ void C2SplineCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 	float* ysigmas = new float[numPt];
 	float* yderivs = new float[numPt];
 
+	// purely math calculations
 	xdiffs[0] = 3 * (ctrlPts[1].x - ctrlPts[0].x);
 	for (int i = 1; i < numPt - 1; i++)
 		xdiffs[i] = 3 * (ctrlPts[i + 1].x - ctrlPts[i - 1].x);
@@ -57,8 +59,9 @@ void C2SplineCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 	for (int i = 1; i < numPt - 1; i++)
 		ydiffs[i] = 3 * (ctrlPts[i + 1].y - ctrlPts[i - 1].y);
 	ydiffs[numPt - 1] = 3 * (ctrlPts[numPt - 1].y - ctrlPts[numPt - 2].y);
-	if (bWrap)
+	if (bWrap) {
 		ydiffs[numPt - 1] = ydiffs[0] = 3 * (ctrlPts[1].y - ctrlPts[numPt - 2].y);
+	}
 
 	ygammas[0] = 0.5;
 	for (int i = 1; i < numPt - 1; i++)
@@ -79,7 +82,7 @@ void C2SplineCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 		Vec4f py(ctrlPts[i].y, ctrlPts[i + 1].y, yderivs[i], yderivs[i + 1]);
 		Vec4f mx = m * px;
 		Vec4f my = m * py;
-		for (float t = 0.0; t <= 1; t += 0.01) {
+		for (float t = 0.0; t < 1; t += 0.01) {
 			Vec4f v(t * t * t, t * t, t, 1);
 			float x = v * mx;
 			float y = v * my;

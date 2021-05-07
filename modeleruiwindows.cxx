@@ -26,6 +26,7 @@ Fl_Menu_Item ModelerUIWindows::menu_m_pmbMenuBar[] = {
  {"&Show cloth", 0,  0, 0, 0, 0, 0, 14, 0},
  {"S&how collision", 0,  0, 0, 0, 0, 0, 14, 0},
  {"Sho&w metaball", 0,  0, 0, 0, 0, 0, 14, 0},
+ {"Show& original", 0,  0, 0, 0, 0, 0, 14, 0},
  {0},
  {0}
 };
@@ -45,6 +46,7 @@ Fl_Menu_Item* ModelerUIWindows::m_pmiSetAniLen = ModelerUIWindows::menu_m_pmbMen
 Fl_Menu_Item* ModelerUIWindows::m_pmiShowCloth = ModelerUIWindows::menu_m_pmbMenuBar + 20;
 Fl_Menu_Item* ModelerUIWindows::m_pmiShowCollision = ModelerUIWindows::menu_m_pmbMenuBar + 21;
 Fl_Menu_Item* ModelerUIWindows::m_pmiShowMetaball = ModelerUIWindows::menu_m_pmbMenuBar + 22;
+Fl_Menu_Item* ModelerUIWindows::m_pmiShowOriginal = ModelerUIWindows::menu_m_pmbMenuBar + 23;
 
 Fl_Menu_Item ModelerUIWindows::menu_m_pchoCurveType[] = {
  {"Linear", 0,  0, 0, 0, 0, 0, 12, 0},

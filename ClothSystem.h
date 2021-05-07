@@ -4,13 +4,13 @@
 class ClothSystem : public ParticleSystem
 {
 public:
-	ClothSystem(vector<Force*> forces, float fps, float gridSize, int height, int width, Vec3f startPoint, float ks, float kd);
+	ClothSystem(vector<Force*> forces, float gridSize, int height, int width, Vec3f startPoint, float ks, float kd);
 
 	void drawParticles(float t);
 	void computeForcesAndUpdateParticles(float t);
 
 private:
-	vector<Spring*> springs;
+	vector<Spring> springs;
 	vector<Vec3f> normals;
 	float gridSize;
 	int height, width;

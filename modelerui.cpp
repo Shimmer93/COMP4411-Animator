@@ -272,6 +272,16 @@ void ModelerUI::cb_metaball(Fl_Menu_* o, void* v)
 	((ModelerUI*)(o->parent()->user_data()))->cb_metaball_i(o, v);
 }
 
+inline void ModelerUI::cb_original_i(Fl_Menu_*, void*)
+{
+	m_iDrawMode = ORIGINAL;
+}
+
+void ModelerUI::cb_original(Fl_Menu_* o, void* v)
+{
+	((ModelerUI*)(o->parent()->user_data()))->cb_original_i(o, v);
+}
+
 inline void ModelerUI::cb_fps_i(Fl_Slider*, void*) 
 {
 	fps(m_psldrFPS->value());

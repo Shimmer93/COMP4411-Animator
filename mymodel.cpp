@@ -27,32 +27,64 @@ const int MAX_FRAME = 60;
 const int MAX_MOOD_COUNT = 60;
 bool MOOD = false;
 
+unsigned int TEXTURES[NUM_TEXTURES];
+
+ModelerView* createMyModel(int x, int y, int w, int h, char* label);
+Mat4f getModelViewMatrix();
+float getCurrentFrameArmAngle();
+float getCurrentFrameBodyHeight();
+void loadTextureFromBitmap(const char* imgName, int id);
+void loadTextureFromTGA(const char* imgName, int id);
+void initTexture();
+void drawSurfaceOfRotation(double h, std::function<double(double)> curve);
+void drawBinaryLSystem(int numIter, std::function<void(int)> drawStart);
+void drawA(int numIter);
+void drawB(int numIter);
+
 // To make a SampleModel, we inherit off of ModelerView
 class MyModel : public ModelerView
 {
 public:
 	MyModel(int x, int y, int w, int h, char* label)
-		: ModelerView(x, y, w, h, label), initialized(false), metaBall(new MetaBall(50, 50, 50, 0.2))
+		: ModelerView(x, y, w, h, label), initialized(false)
 	{
-		vector<Force*> forces;
-		forces.push_back(new TestForce());
-		cloth = new ClothSystem(forces, ModelerApplication::Instance()->GetFps(),
-			0.1, 50, 50, Vec3f(-2.5, -2.5, 0), 2.0, 0.5);
+		metaBall = new MetaBall(50, 50, 50, 0.2);
+		metaBall->addBall(Ball(1.0, 1.0, 0.6, 0.6));
+		metaBall->addBall(Ball(1.0, 1.0, 1.4, 0.4));
+		metaBall->addBall(Ball(1.0, 1.0, 2.0, 0.3));
+		metaBall->addBall(Ball(1.0, 1.0, 2.4, 0.2));
+		metaBall->prepare(2);
 
-		collision = new ParticleSystem(vector<Force*>(), ModelerApplication::Instance()->GetFps(), true);
-		collision->addParticle(new Particle(0.1, Vec3f(-2, -2, 0), Vec3f(1, 1, 0), Vec3f(0, 0, 0)));
-		collision->addParticle(new Particle(0.2, Vec3f(2, 1, 0), Vec3f(-1, -0.5, 0), Vec3f(0, 0, 0)));
+		vector<Force*> psForces;
+		psForces.push_back(new Gravity(5.0));
+		ps = new ParticleSystem(psForces, false);
+
+		vector<Force*> clothForces;
+		clothForces.push_back(new TestForce());
+		//clothForces.push_back(new Gravity(5.0));
+		cloth = new ClothSystem(clothForces, 0.1, 50, 50, Vec3f(-2.5, 0, -2.5), 3.0, 1.0);
+
+		collision = new ParticleSystem(vector<Force*>(), true);
+		collision->addParticle(Particle(0.1, Vec3f(-2, -2, 0), Vec3f(1, 1, 0), Vec3f(0, 0, 0)));
+		collision->addParticle(Particle(0.2, Vec3f(2, 1, 0), Vec3f(-1, -0.5, 0), Vec3f(0, 0, 0)));
+
+		envTex = new MetaBall(30, 30, 30, 0.3);
+		envTex->addBall(Ball(5.0, 5.0, 5.0, 1.5));
+		envTex->addBall(Ball(5.0, 5.0, 5.0, 1.1));
+		envTex->addBall(Ball(5.0, 5.0, 5.0, 1.25));
 	}
 
-	void init();
 	virtual void draw();
 	void drawModel();
 
 private:
 	bool initialized;
+
 	MetaBall* metaBall;
+	ParticleSystem* ps;
 	ClothSystem* cloth;
 	ParticleSystem* collision;
+	MetaBall* envTex;
 
 	void drawArmWithShoulder(int angle, double x, double y, double z);
 	void drawOriginal();
@@ -73,20 +105,6 @@ ModelerView* createMyModel(int x, int y, int w, int h, char* label)
 
 Mat4f getModelViewMatrix()
 {
-	/**************************
-	**
-	**	GET THE OPENGL MODELVIEW MATRIX
-	**
-	**	Since OpenGL stores it's matricies in
-	**	column major order and our library
-	**	use row major order, we will need to
-	**	transpose what OpenGL gives us before returning.
-	**
-	**	Hint:  Use look up glGetFloatv or glGetDoublev
-	**	for how to get these values from OpenGL.
-	**
-	*******************************/
-
 	GLfloat m[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, m);
 	Mat4f matMV(m[0], m[1], m[2], m[3],
@@ -118,28 +136,50 @@ float getCurrentFrameBodyHeight() {
 		return -0.01 * (MAX_FRAME - FRAME);
 }
 
-// Initialize the texture
-void initTexture() {
-	// Read the bitmap
-	char* imgName = "textures/Bubble.tga";
+void loadTextureFromBitmap(const char* imgName, int id)
+{
 	int width, height;
+	unsigned char* data = readBMP(imgName, width, height);
 
-	unsigned char* data = readTGA(imgName, width, height);
+	glGenTextures(1, TEXTURES + id);
+	glBindTexture(GL_TEXTURE_2D, TEXTURES[id]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
-	// Load the bitmap into the texture
-	GLuint textureID;
-	glGenTextures(TEXTURE_ID, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-	// Set parameters for the texture
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+}
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void loadTextureFromTGA(const char* imgName, int id)
+{
+	int width, height;
+	unsigned char* data = readTGA(imgName, width, height);
+
+	glGenTextures(1, TEXTURES + id);
+	glBindTexture(GL_TEXTURE_2D, TEXTURES[id]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+}
+
+// Initialize the texture
+void initTexture() {
+	loadTextureFromBitmap("textures/Metal.bmp", TEXTURE_METAL);
+	loadTextureFromTGA("textures/Bubble.tga", TEXTURE_BUBBLE);
+	loadTextureFromBitmap("textures/Chrome.bmp", TEXTURE_CHROME);
+	loadTextureFromTGA("textures/LightFlare.tga", TEXTURE_LIGHT_FLARE);
+
+	// sphere map for environmental texture on metaballs
+	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
+	glTexGeni(GL_S, GL_SPHERE_MAP, 0);
+	glTexGeni(GL_T, GL_SPHERE_MAP, 0);
 }
 
 // Tricky implementation od surface of rotation, using drawCylinder()
@@ -178,8 +218,6 @@ void drawSurfaceOfRotation(double h, std::function<double(double)> curve) {
 void drawBinaryLSystem(int numIter, std::function<void(int)> drawStart) {
 	drawStart(numIter);
 }
-
-void drawB(int numIter);
 
 void drawA(int numIter) {
 	drawCylinder(0.3 * numIter, 0.15 * numIter, 0.15 * numIter);
@@ -381,20 +419,6 @@ void MyModel::drawArmWithShoulder(int angle, double x, double y, double z) {
 	glPopMatrix();
 }
 
-// Run once before start to draw
-void MyModel::init()
-{
-	initTexture();
-
-	metaBall->addBall(Ball(1.0, 1.0, 0.6, 0.6));
-	metaBall->addBall(Ball(1.0, 1.0, 1.4, 0.4));
-	metaBall->addBall(Ball(1.0, 1.0, 2.0, 0.3));
-	metaBall->addBall(Ball(1.0, 1.0, 2.4, 0.2));
-	metaBall->prepare(2);
-
-	initialized = true;
-}
-
 void MyModel::draw()
 {
 	// This call takes care of a lot of the nasty projection 
@@ -430,14 +454,15 @@ void MyModel::drawModel()
 	Mat4f cameraMatrix = getModelViewMatrix();
 	ParticleSystem* ps = ModelerApplication::Instance()->GetParticleSystem();
 
-	// Initialization
-	if (!initialized)
-		init();
+	if (!initialized) {
+		initTexture();
+		initialized = true;
+	}
 
 	// Texture
 	if (VAL(USE_TEXTURE) == 1) {
 		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, TEXTURE_ID);
+		glBindTexture(GL_TEXTURE_2D, TEXTURES[TEXTURE_METAL]);
 	}
 	else {
 		glDisable(GL_TEXTURE_2D);
@@ -507,9 +532,13 @@ void MyModel::drawModel()
 
 void MyModel::drawOriginal()
 {
-	
+	if (ModelerApplication::Instance()->GetParticleSystem() != ps) {
+		ModelerApplication::Instance()->SetParticleSystem(ps);
+		ps->setFps(ModelerApplication::Instance()->GetFps());
+		ps->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
+	}
+
 	Mat4f cameraMatrix = getModelViewMatrix();
-	ParticleSystem* ps = ModelerApplication::Instance()->GetParticleSystem();
 
 	glPushMatrix();
 	glTranslated(VAL(XPOS), VAL(YPOS), VAL(ZPOS));
@@ -589,6 +618,7 @@ void MyModel::drawCloth()
 {
 	if (ModelerApplication::Instance()->GetParticleSystem() != cloth) {
 		ModelerApplication::Instance()->SetParticleSystem(cloth);
+		cloth->setFps(ModelerApplication::Instance()->GetFps());
 		cloth->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
 	}
 	cloth->drawParticles(ModelerApplication::Instance()->GetTime());
@@ -598,6 +628,7 @@ void MyModel::drawCollision()
 {
 	if (ModelerApplication::Instance()->GetParticleSystem() != collision) {
 		ModelerApplication::Instance()->SetParticleSystem(collision);
+		collision->setFps(ModelerApplication::Instance()->GetFps());
 		collision->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
 	}
 	collision->drawParticles(ModelerApplication::Instance()->GetTime());
@@ -605,7 +636,18 @@ void MyModel::drawCollision()
 
 void MyModel::drawMetaball()
 {
-	return;
+	float dt = 1.0 / ModelerApplication::Instance()->GetFps();
+
+	vector<Ball>& balls = envTex->getBalls();
+	balls[0].o += Vec3f(0.4, 0.4, 0.0) * dt;
+	balls[1].o += Vec3f(-0.4, 0.2, -0.2) * dt;
+	balls[2].o += Vec3f(0.4, -0.4, 0.2) * dt;
+
+	envTex->prepare(2);
+	glPushMatrix();
+	glTranslatef(-5.0, -5.0, -5.0);
+	envTex->draw(1.5);
+	glPopMatrix();
 }
 
 	
@@ -666,12 +708,6 @@ int main()
 	controls[MIRROR] = ModelerControl("Enable Mirror", 0, 1, 1, 0);
 
 	ModelerApplication::Instance()->Init(&createMyModel, controls, NUMCONTROLS);
-
-	vector<Force*> forces;
-	forces.push_back(new Gravity(5.0));
-	ParticleSystem* ps = new ParticleSystem(forces, ModelerApplication::Instance()->GetFps(), false);
-	ps->setCamera(ModelerApplication::Instance()->GetUI()->m_pwndModelerView->m_camera);
-
-	ModelerApplication::Instance()->SetParticleSystem(ps);
+	ModelerApplication::Instance()->SetParticleSystem(nullptr);
 	return ModelerApplication::Instance()->Run();
 }

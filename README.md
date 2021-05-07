@@ -26,14 +26,14 @@
 - [ ] (1W) Use environment mapping to simulate a reflective material
 - [ ] (1W) Motion blur
 - [ ] (1W) Skyboxes
-- [ ] (1W) Runge-Kutta technique
+- [x] (1W) Runge-Kutta technique
 - [ ] (1W) Use openGL display lists to speed up the rendering
 - [ ] (1W) Adaptive Bezier curve generation
-- [ ] (1B) Extend the particle system to handle springs
-- [ ] (1B) Collision detection
+- [x] (1B) Extend the particle system to handle springs
+- [x] (1B) Collision detection
 - [ ] (1B) "General" subdivision curve
 - [ ] (1B) Heightfields
-- [ ] (1B) Extend metaballs so that it support environment mapping
+- [x] (1B) Extend metaballs so that it support environment mapping
 - [ ] (1B1W) Lens flare
 - [ ] (1B1W, vary) New interface
 - [ ] (2B) Flocking behaviors of particles
