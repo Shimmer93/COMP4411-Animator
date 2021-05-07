@@ -17,8 +17,6 @@ ClothSystem::ClothSystem(vector<Force*> forces, float gridSize, int height, int 
 		}
 	}
 
-	//cout << "before spring" << particles[0]->p << endl;
-
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
 			if (i < width - 1)
@@ -47,8 +45,6 @@ void ClothSystem::computeForcesAndUpdateParticles(float t)
 	for (auto spring : springs)
 		spring->apply();
 
-	//particles[height * width - 1]->f = Vec3f(0.0, 0.0, 0.0);
-
 	for (auto par : particles)
 		updateParticle(par, t, false);
 
@@ -58,16 +54,24 @@ void ClothSystem::computeForcesAndUpdateParticles(float t)
 
 void ClothSystem::drawParticles(float t)
 {
-	if (simulate) {
+	vector<Particle*> particlesToDraw;
+	if (baked_data.count(t) > 0) {
+		particlesToDraw = baked_data.at(t);
+	}
+	else if (simulate) {
 		if (baked_data.count(t) == 0)
 			computeForcesAndUpdateParticles(t);
+		particlesToDraw = particles;
+	}
+
+	if (!particlesToDraw.empty()) {
 		clearNormals();
 		for (int j = 0; j < height - 1; j++) {
 			for (int i = 0; i < width - 1; i++) {
-				Vec3f p0 = particles[j * width + i]->p;
-				Vec3f p1 = particles[(j + 1) * width + i]->p;
-				Vec3f p2 = particles[(j + 1) * width + i + 1]->p;
-				Vec3f p3 = particles[j * width + i + 1]->p;
+				Vec3f p0 = particlesToDraw[j * width + i]->p;
+				Vec3f p1 = particlesToDraw[(j + 1) * width + i]->p;
+				Vec3f p2 = particlesToDraw[(j + 1) * width + i + 1]->p;
+				Vec3f p3 = particlesToDraw[j * width + i + 1]->p;
 
 				Vec3f n012 = computeFaceNormal(p0, p1, p2);
 				Vec3f n023 = computeFaceNormal(p2, p3, p0);
@@ -97,10 +101,10 @@ void ClothSystem::drawParticles(float t)
 
 		for (int j = 0; j < height - 1; j++) {
 			for (int i = 0; i < width - 1; i++) {
-				Vec3f p0 = particles[j * width + i]->p;
-				Vec3f p1 = particles[(j + 1) * width + i]->p;
-				Vec3f p2 = particles[(j + 1) * width + i + 1]->p;
-				Vec3f p3 = particles[j * width + i + 1]->p;
+				Vec3f p0 = particlesToDraw[j * width + i]->p;
+				Vec3f p1 = particlesToDraw[(j + 1) * width + i]->p;
+				Vec3f p2 = particlesToDraw[(j + 1) * width + i + 1]->p;
+				Vec3f p3 = particlesToDraw[j * width + i + 1]->p;
 
 				Vec3f n0 = normals[j * width + i];
 				Vec3f n1 = normals[(j + 1) * width + i];
@@ -142,12 +146,12 @@ Vec3f ClothSystem::computeFaceNormal(Vec3f p0, Vec3f p1, Vec3f p2)
 
 void ClothSystem::clearNormals()
 {
-	for (auto normal : normals) {
+	for (auto normal : normals)
 		normal = Vec3f(0.0, 0.0, 0.0);
-	}
 }
 
 void ClothSystem::sortParticles()
 {
+	// do nothing
 	return;
 }
