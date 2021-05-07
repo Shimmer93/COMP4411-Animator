@@ -11,28 +11,29 @@ ClothSystem::ClothSystem(vector<Force*> forces, float gridSize, int height, int 
 {
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			particles.push_back(new Particle(0.1, startPoint + Vec3f(i * gridSize, 0, j * gridSize),
+			particles.push_back(Particle(0.1, startPoint + Vec3f(i * gridSize, 0, j * gridSize),
 				Vec3f(0, 0, 0), Vec3f(0, 0, 0)));
 			normals.push_back(Vec3f(0.0, 0.0, 0.0));
 		}
 	}
 
-	//cout << "before spring" << particles[0]->p << endl;
-
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
+			// structual springs
 			if (i < width - 1)
-				springs.push_back(new Spring(ks, kd, gridSize, particles[j * width + i], particles[j * width + i + 1]));
+				springs.push_back(Spring(ks, kd, gridSize, &particles[j * width + i], &particles[j * width + i + 1]));
 			if (j < height - 1)
-				springs.push_back(new Spring(ks, kd, gridSize, particles[j * width + i], particles[(j + 1) * width + i]));
+				springs.push_back(Spring(ks, kd, gridSize, &particles[j * width + i], &particles[(j + 1) * width + i]));
+			// shear springs
 			if (i < width - 1 && j < height - 1) {
-				springs.push_back(new Spring(ks, kd, SQRT2 * gridSize, particles[j * width + i], particles[(j + 1) * width + i + 1]));
-				springs.push_back(new Spring(ks, kd, SQRT2 * gridSize, particles[j * width + i + 1], particles[(j + 1) * width + i]));
+				springs.push_back(Spring(ks, kd, SQRT2 * gridSize, &particles[j * width + i], &particles[(j + 1) * width + i + 1]));
+				springs.push_back(Spring(ks, kd, SQRT2 * gridSize, &particles[j * width + i + 1], &particles[(j + 1) * width + i]));
 			}
+			// bend springs
 			if (i < width - 2)
-				springs.push_back(new Spring(ks, kd, 2 * gridSize, particles[j * width + i], particles[j * width + i + 2]));
+				springs.push_back(Spring(ks, kd, 2 * gridSize, &particles[j * width + i], &particles[j * width + i + 2]));
 			if (j < height - 2)
-				springs.push_back(new Spring(ks, kd, 2 * gridSize, particles[j * width + i], particles[(j + 2) * width + i]));
+				springs.push_back(Spring(ks, kd, 2 * gridSize, &particles[j * width + i], &particles[(j + 2) * width + i]));
 		}
 	}
 }
@@ -41,15 +42,13 @@ void ClothSystem::computeForcesAndUpdateParticles(float t)
 {
 	if (bake_fps <= 0) return;
 
-	for (auto par : particles)
-		par->f = Vec3f(0.0, 0.0, 0.0);
+	for (Particle& par : particles)
+		par.f = Vec3f(0.0, 0.0, 0.0);
 
-	for (auto spring : springs)
-		spring->apply();
+	for (Spring& spring : springs)
+		spring.apply();
 
-	//particles[height * width - 1]->f = Vec3f(0.0, 0.0, 0.0);
-
-	for (auto par : particles)
+	for (Particle& par : particles)
 		updateParticle(par, t, false);
 
 	if (simulate)
@@ -58,16 +57,26 @@ void ClothSystem::computeForcesAndUpdateParticles(float t)
 
 void ClothSystem::drawParticles(float t)
 {
-	if (simulate) {
+	vector<Particle> particlesToDraw;
+	if (baked_data.count(t) > 0) {
+		particlesToDraw.assign(baked_data.at(t).begin(), baked_data.at(t).end());
+	} 
+	else if (simulate) {
 		if (baked_data.count(t) == 0)
 			computeForcesAndUpdateParticles(t);
+		particlesToDraw.assign(particles.begin(), particles.end());
+	}
+
+	if (!particlesToDraw.empty()) {
 		clearNormals();
+
+		// update the normals
 		for (int j = 0; j < height - 1; j++) {
 			for (int i = 0; i < width - 1; i++) {
-				Vec3f p0 = particles[j * width + i]->p;
-				Vec3f p1 = particles[(j + 1) * width + i]->p;
-				Vec3f p2 = particles[(j + 1) * width + i + 1]->p;
-				Vec3f p3 = particles[j * width + i + 1]->p;
+				Vec3f p0 = particlesToDraw[j * width + i].p;
+				Vec3f p1 = particlesToDraw[(j + 1) * width + i].p;
+				Vec3f p2 = particlesToDraw[(j + 1) * width + i + 1].p;
+				Vec3f p3 = particlesToDraw[j * width + i + 1].p;
 
 				Vec3f n012 = computeFaceNormal(p0, p1, p2);
 				Vec3f n023 = computeFaceNormal(p2, p3, p0);
@@ -78,11 +87,6 @@ void ClothSystem::drawParticles(float t)
 				normals[(j + 1) * width + i] += n012 + n013 + n123;
 				normals[(j + 1) * width + i + 1] += n012 + n023 + n123;
 				normals[j * width + i + 1] += n023 + n013 + n123;
-
-				/*normals[j * width + i] += n012;
-				normals[(j + 1) * width + i] += n013;
-				normals[(j + 1) * width + i + 1] += n123;
-				normals[j * width + i + 1] += n023;*/
 			}
 		}
 
@@ -92,15 +96,16 @@ void ClothSystem::drawParticles(float t)
 			}
 		}
 
+		// draw the cloth with the updated normals
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 		glEnable(GL_NORMALIZE);
 
 		for (int j = 0; j < height - 1; j++) {
 			for (int i = 0; i < width - 1; i++) {
-				Vec3f p0 = particles[j * width + i]->p;
-				Vec3f p1 = particles[(j + 1) * width + i]->p;
-				Vec3f p2 = particles[(j + 1) * width + i + 1]->p;
-				Vec3f p3 = particles[j * width + i + 1]->p;
+				Vec3f p0 = particlesToDraw[j * width + i].p;
+				Vec3f p1 = particlesToDraw[(j + 1) * width + i].p;
+				Vec3f p2 = particlesToDraw[(j + 1) * width + i + 1].p;
+				Vec3f p3 = particlesToDraw[j * width + i + 1].p;
 
 				Vec3f n0 = normals[j * width + i];
 				Vec3f n1 = normals[(j + 1) * width + i];
@@ -142,9 +147,8 @@ Vec3f ClothSystem::computeFaceNormal(Vec3f p0, Vec3f p1, Vec3f p2)
 
 void ClothSystem::clearNormals()
 {
-	for (auto normal : normals) {
+	for (auto normal : normals)
 		normal = Vec3f(0.0, 0.0, 0.0);
-	}
 }
 
 void ClothSystem::sortParticles()

@@ -26,6 +26,7 @@ void C2SplineCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 	const int numPt = ctrlPts.size();
 	if (numPt < 2) return;
 
+	// used matrices
 	float* xdiffs = new float[numPt];
 	float* xgammas = new float[numPt];
 	float* xsigmas = new float[numPt];
@@ -35,6 +36,7 @@ void C2SplineCurveEvaluator::evaluateCurve(const std::vector<Point>& ptvCtrlPts,
 	float* ysigmas = new float[numPt];
 	float* yderivs = new float[numPt];
 
+	// purely math calculations
 	xdiffs[0] = 3 * (ctrlPts[1].x - ctrlPts[0].x);
 	for (int i = 1; i < numPt - 1; i++)
 		xdiffs[i] = 3 * (ctrlPts[i + 1].x - ctrlPts[i - 1].x);

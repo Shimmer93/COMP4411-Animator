@@ -25,12 +25,6 @@ Vec3f TestForce::apply(const Particle* par, float t)
 	else {
 		return Vec3f(0, 0, 0);
 	}
-	/*if (par->p[1] < 1e-5) {
-		return Vec3f(0.0, par->m * 5.0, 0.0);
-	}
-	else {
-		return Vec3f(0.0, 0.0, 0.0);
-	}*/
 }
 
 void Spring::apply()

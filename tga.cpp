@@ -44,7 +44,7 @@ unsigned char* readTGA(const char* szFileName, int& iWidth, int& iHeight)
 
 		fread(&tgafh, sizeof(TGA_FILEHEADER), 1, pfTGAFile);
 
-		cout << "id len: " << (int)tgafh.bfIDLen << endl;
+		/*cout << "id len: " << (int)tgafh.bfIDLen << endl;
 		cout << "color map type: " << (int)tgafh.bfColorMapType << endl;
 		cout << "img type: " << (int)tgafh.bfImageType << endl;
 		cout << "first index: " << (int)tgafh.bfFirstEntryIndex << endl;
@@ -53,8 +53,9 @@ unsigned char* readTGA(const char* szFileName, int& iWidth, int& iHeight)
 		cout << "x & y origin: " << (int)tgafh.bfXOrigin << " " << (int)tgafh.bfYOrigin << endl;
 		cout << "width & height: " << (int)tgafh.bfWidth << " " << (int)tgafh.bfHeight << endl;
 		cout << "pixel depth: " << (int)tgafh.bfPixelDepth << endl;
-		cout << "image desc: " << (int)tgafh.bfImageDesc << endl;
+		cout << "image desc: " << (int)tgafh.bfImageDesc << endl;*/
 
+		// only limited formats supported
 		if (tgafh.bfImageType != 2)
 			break;
 		if (tgafh.bfColorMapType == 1)

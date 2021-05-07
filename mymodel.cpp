@@ -65,8 +65,8 @@ public:
 		cloth = new ClothSystem(clothForces, 0.1, 50, 50, Vec3f(-2.5, 0, -2.5), 3.0, 1.0);
 
 		collision = new ParticleSystem(vector<Force*>(), true);
-		collision->addParticle(new Particle(0.1, Vec3f(-2, -2, 0), Vec3f(1, 1, 0), Vec3f(0, 0, 0)));
-		collision->addParticle(new Particle(0.2, Vec3f(2, 1, 0), Vec3f(-1, -0.5, 0), Vec3f(0, 0, 0)));
+		collision->addParticle(Particle(0.1, Vec3f(-2, -2, 0), Vec3f(1, 1, 0), Vec3f(0, 0, 0)));
+		collision->addParticle(Particle(0.2, Vec3f(2, 1, 0), Vec3f(-1, -0.5, 0), Vec3f(0, 0, 0)));
 
 		envTex = new MetaBall(30, 30, 30, 0.3);
 		envTex->addBall(Ball(5.0, 5.0, 5.0, 1.5));
@@ -104,20 +104,6 @@ ModelerView* createMyModel(int x, int y, int w, int h, char* label)
 
 Mat4f getModelViewMatrix()
 {
-	/**************************
-	**
-	**	GET THE OPENGL MODELVIEW MATRIX
-	**
-	**	Since OpenGL stores it's matricies in
-	**	column major order and our library
-	**	use row major order, we will need to
-	**	transpose what OpenGL gives us before returning.
-	**
-	**	Hint:  Use look up glGetFloatv or glGetDoublev
-	**	for how to get these values from OpenGL.
-	**
-	*******************************/
-
 	GLfloat m[16];
 	glGetFloatv(GL_MODELVIEW_MATRIX, m);
 	Mat4f matMV(m[0], m[1], m[2], m[3],
@@ -188,6 +174,7 @@ void initTexture() {
 	loadTextureFromBitmap("textures/Chrome.bmp", TEXTURE_CHROME);
 	loadTextureFromTGA("textures/LightFlare.tga", TEXTURE_LIGHT_FLARE);
 
+	// sphere map for environmental texture on metaballs
 	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
 	glTexGeni(GL_S, GL_SPHERE_MAP, 0);
@@ -626,6 +613,7 @@ void MyModel::drawMetaball()
 	balls[0].o += Vec3f(0.4, 0.4, 0.0) * dt;
 	balls[1].o += Vec3f(-0.4, 0.2, -0.2) * dt;
 	balls[2].o += Vec3f(0.4, -0.4, 0.2) * dt;
+
 	envTex->prepare(2);
 	glPushMatrix();
 	glTranslatef(-5.0, -5.0, -5.0);

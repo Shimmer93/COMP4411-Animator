@@ -10,7 +10,7 @@ public:
 	void computeForcesAndUpdateParticles(float t);
 
 private:
-	vector<Spring*> springs;
+	vector<Spring> springs;
 	vector<Vec3f> normals;
 	float gridSize;
 	int height, width;

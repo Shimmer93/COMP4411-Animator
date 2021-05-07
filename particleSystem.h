@@ -69,13 +69,13 @@ public:
 	// of baked particles (without leaking memory).
 	virtual void clearBaked();	
 
+	// Spawn particles continuously to simulate flowing effect
 	virtual void spawnParticles(Mat4f cameraMatrix, Mat4f modelViewMatrix, int numParticles);
 
+	// Util functions
 	virtual void clearParticles();
-
 	virtual void sortParticles();
-
-	virtual void addParticle(Particle* par);
+	virtual void addParticle(const Particle& par);
 
 
 	// These accessor fxns are implemented for you
@@ -92,8 +92,8 @@ public:
 protected:
 	Camera* camera;
 
-	vector<Particle*> particles;
-	map<float, vector<Particle*>> baked_data;
+	vector<Particle> particles;
+	map<float, vector<Particle>> baked_data;
 
 	vector<Force*> forces;
 
@@ -109,9 +109,9 @@ protected:
 	bool dirty;							// flag for updating ui (don't worry about this)
 	bool collide;
 
-	void updateParticle(Particle* par, float t, bool clear);
-	void applyForces(Particle* par, float t, bool clear);
-	bool compareParticles(const Particle* par1, const Particle* par2);
+	void updateParticle(Particle& par, float t, bool clear);
+	void applyForces(Particle& par, float t, bool clear);
+	bool compareParticles(const Particle& par1, const Particle& par2);
 	void detectCollision(float thresh);
 };
 
