@@ -75,6 +75,7 @@ public:
 	}
 
 	virtual void draw();
+	void drawModel();
 
 private:
 	bool initialized;
@@ -424,6 +425,34 @@ void MyModel::draw()
 	// matrix stuff.  Unless you want to fudge directly with the 
 	// projection matrix, don't bother with this ...
 	ModelerView::draw();
+	if (VAL(MIRROR) == 1) {
+		glClearStencil(0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glDepthMask(false);
+		glEnable(GL_STENCIL_TEST);
+		glStencilFunc(GL_ALWAYS, 1, 1);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		glPushMatrix();
+		setDiffuseColor(1.0f, 1.0f, 1.0f);
+		glTranslated(-5, -5, 8);
+		drawBox(10, 10, 0.05);
+		glPopMatrix();
+		glDepthMask(true);
+		glStencilFunc(GL_EQUAL, 1, 1);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		glPushMatrix();
+		glTranslated(0, 0, 8);
+		glScalef(1.0f, 1.0f, -1.0f);
+		MyModel::drawModel();
+		glPopMatrix();
+		glDisable(GL_STENCIL_TEST);
+	}
+	MyModel::drawModel();
+}
+void MyModel::drawModel()
+{
+	Mat4f cameraMatrix = getModelViewMatrix();
+	ParticleSystem* ps = ModelerApplication::Instance()->GetParticleSystem();
 
 	if (!initialized) {
 		initTexture();
@@ -452,8 +481,8 @@ void MyModel::draw()
 	setDiffuseColor(0.616, 0.753, 0.816);
 
 	// Lighting
-	float light0pos[4] = {VAL(LIGHT0_X), VAL(LIGHT0_Y), VAL(LIGHT0_Z), 0.0};
-	float light1pos[4] = {VAL(LIGHT1_X), VAL(LIGHT1_Y), VAL(LIGHT1_Z), 0.0};
+	float light0pos[4] = { VAL(LIGHT0_X), VAL(LIGHT0_Y), VAL(LIGHT0_Z), 0.0 };
+	float light1pos[4] = { VAL(LIGHT1_X), VAL(LIGHT1_Y), VAL(LIGHT1_Z), 0.0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light0pos);
 	glLightfv(GL_LIGHT1, GL_POSITION, light1pos);
 	if (VAL(USE_SPECULAR) == 1) {
@@ -621,6 +650,9 @@ void MyModel::drawMetaball()
 	glPopMatrix();
 }
 
+	
+
+
 int main()
 {
 	// Initialize the controls
@@ -673,6 +705,7 @@ int main()
 	controls[METABALL_THRESHOLD] = ModelerControl("Metaball Threshold", 0.1, 5.0, 0.1, 1.0);
 	controls[ARM_NUMBER] = ModelerControl("Amount of Arms", 4, 6, 1, 4);
 	controls[MOOD_CYCLING] = ModelerControl("Enable Mood Cycling?", 0, 1, 1, 0);
+	controls[MIRROR] = ModelerControl("Enable Mirror", 0, 1, 1, 0);
 
 	ModelerApplication::Instance()->Init(&createMyModel, controls, NUMCONTROLS);
 	ModelerApplication::Instance()->SetParticleSystem(nullptr);

@@ -16,7 +16,7 @@
 
 - [x] (1W) Enhance the spline options (tension adjustion)
 - [x] (1W) Support of TGA file format
-- [ ] (1W) Render a mirror
+- [x] (1W + 1W) Render a mirror
 - [x] (1W) Billboarding
 - [ ] (1W each) Use billboarding to render the following:
   - [ ] Fire
