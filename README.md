@@ -1,6 +1,6 @@
 # COMP4411 Project 4: Animator
 
-
+PENG Zhuoxuan    CHEN Mengqi
 
 ## Requirement
 
@@ -9,6 +9,7 @@
   - [x] B-Spline Curve
   - [x] Catmull-Rom Curve
 - [x] Particle system
+- [x] Animation artifact (see movie.zip)
 
 
 
@@ -49,6 +50,3 @@
 - [ ] (4B) Subdivision surfaces
 - [ ] (???) Inverse kinematics
 - [ ] (???) Interactive Control of Physically-Based Animation
-
-
-
