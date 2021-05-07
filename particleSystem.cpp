@@ -125,7 +125,8 @@ void ParticleSystem::drawParticles(float t)
   * your data structure for storing baked particles **/
 void ParticleSystem::bakeParticles(float t) 
 {
-	baked_data[t].assign(particles.begin(), particles.end());
+	if(t >= bake_start_time && (t <= bake_end_time || bake_end_time == -1))
+		baked_data[t].assign(particles.begin(), particles.end());
 }
 
 /** Clears out your data structure of baked particles */
