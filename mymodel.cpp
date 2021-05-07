@@ -528,6 +528,8 @@ void MyModel::drawModel()
 			MOOD_COUNT = 0;
 		}
 	}
+
+	endDraw();
 }
 
 void MyModel::drawOriginal()
